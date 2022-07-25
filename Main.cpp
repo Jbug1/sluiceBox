@@ -10,7 +10,7 @@ int main()
 	std::ofstream myfile;
 	myfile.open("test_input.txt");
 	auto start = std::chrono::high_resolution_clock::now();
-	for (int i = 0; i < 1000000000; ++i)
+	for (int i = 0; i < 1000000; ++i)
 	{
 		myfile << "Writing this to a file " << i << "\n";
 	}
