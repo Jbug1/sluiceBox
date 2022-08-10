@@ -35,7 +35,7 @@ def choose_genome_sparsity(genome_filesize, read_filesize, read_length, key_size
     else:
         return out
 
-def estimate_perc_full(key_size, bases,exons):
+def estimate_unique(key_size, bases,exons, sparsity):
     """
     size: total number of bases
     key_length: length of partial key
@@ -46,11 +46,11 @@ def estimate_perc_full(key_size, bases,exons):
     *****have dropped sparsity factor for now___need to think this thru******
     """
     
-    samps = ((bases/exons)-key_size)*exons
+    samps = ((bases/exons)-key_size)*exons/sparsity
     expected_unique=(1-(1-1/samps)**(4**key_size))*samps
-    return expected_unique/4**key_size
+    return expected_unique
 
-def generate_key_size(bases, exons, fpr=0.1):
+def generate_key_size(bases, exons, fpr=0.05):
     """
     picks the smallest key size that will still give us less than fpr% expected false positives in set filter
     bases: total number of bases in genome used to make filter
@@ -66,13 +66,13 @@ def generate_key_size(bases, exons, fpr=0.1):
     
 
     #increase size until percentage full estimate falls below 1%
-    while estimate_perc_full(key_size, bases, exons) >fpr:
+    while 1-(1-(estimate_unique(key_size, bases, exons,1)/4**key_size))**5 > fpr:
         
         key_size+=1
 
     return key_size
 
-def estimate_bits_needed (key_size, ave_exon_size, num_exons, sparsity):
+def estimate_bits_needed (key_size, ave_exon_size, num_exons, sparsity, fpr):
     """
     estmiate bits needed for bloom filter based on size of keys and how many of them we will have
 
@@ -83,8 +83,11 @@ def estimate_bits_needed (key_size, ave_exon_size, num_exons, sparsity):
 
     returns: number of bits to set filter with
     """
-    total_keys = (ave_exon_size - key_size)*num_exons/sparsity
-    return sys.getsizeof("a"*key_size)*total_keys
+    expected_unique=estimate_unique(key_size,ave_exon_size*num_exons, num_exons, sparsity)
+    bits_needed = int((expected_unique * np.log(fpr)) / np.log(1 / pow(2, np.log(2))))+1
+   
+    return bits_needed
+    
 
 class filter_object():
     """
@@ -100,7 +103,7 @@ class filter_object():
         self.bloombits = bloombits
         self.fpr=fpr
     
-    def generate_filter(self, verbose = False):
+    def generate_filter(self, outfile, verbose = False):
         """
         set_filter: implement filter using has set rather than array
         indices: generate the filter with partial keys beginning at these indices
@@ -117,7 +120,7 @@ class filter_object():
         #     with open(self.genome) as input:
         #         self.indices = range(len(list(seq.parse(input,"fasta").seq[0])))
            
-            
+        num_added=0  
         #use the set filter rather than array
         if self.set_filter:
             filter_ = set()
@@ -130,6 +133,12 @@ class filter_object():
         with open(self.genome) as input:
             for record in seq.parse(input,"fasta"):
 
+                if "NNN" in record.seq:
+                    print("N found")
+
+                else:
+                    print("NO N")
+
                 #initialize variable to tell us the max position we can start from
                 max_index=len(record)-self.key_size-1
 
@@ -140,8 +149,16 @@ class filter_object():
 
                     #add key to filter and increment j 
                     filter_.add(record.seq[j:j+self.key_size])
+                    num_added+=1
                     j+=self.sparsity
-        
+                    with open (outfile, "a") as out:
+
+                        out.write(f"{record.seq[j:j+self.key_size]}\n")
+
+                    out.close()
+
+
+        print(f"{'*'*25}, {num_added},{'*'*25}")
 
         self.filter_ = filter_
         
@@ -179,7 +196,7 @@ class filter_object():
         pass
 
         
-def main(genome, reads_path, out_path, set_filter_,flex_factor, fpr=0.05, premade_filter = False):
+def main(outfile, genome, reads_path, out_path, set_filter_,flex_factor, fpr=0.01, premade_filter = False):
     """
     main function defines the parameters of the filter, loads previously built filter or generates a new one given genome input reference
     inputs are filter object paramters plus option to point to premade filter in memory
@@ -273,7 +290,9 @@ def main(genome, reads_path, out_path, set_filter_,flex_factor, fpr=0.05, premad
     timey=time.time()
 
     #determine number of bits for bloom filter
-    bloom_bits = estimate_bits_needed(key_size = key_size, ave_exon_size=ave_exon_size, num_exons=exons, sparsity=sparsity)
+    bloom_bits = estimate_bits_needed(key_size = key_size, ave_exon_size=ave_exon_size, num_exons=exons, sparsity=sparsity, fpr=fpr)*5
+
+    print(f"estimated needed filter size: {bloom_bits/1000000} mb")
 
     #create filter object
     filter_obj = filter_object(genome=genome, key_size=key_size, sparsity=sparsity ,set_filter = set_filter, bloombits=bloom_bits)
@@ -283,7 +302,7 @@ def main(genome, reads_path, out_path, set_filter_,flex_factor, fpr=0.05, premad
         filter_obj.filter_ = premade_filter
 
     else:
-        filter_obj.generate_filter()
+        filter_obj.generate_filter(outfile)
 
     print("generated filter ", time.time()-timey)
     timey=time.time()
@@ -317,4 +336,4 @@ if __name__ == "__main__":
 
     ###how to process optional params with sys.argv...tomorrow
     ##make sure we pick a sparsity that enables us to not have overlapping partial keys 
-    main(sys.argv[1],sys.argv[2],sys.argv[3], sys.argv[4], int(sys.argv[5]), float(sys.argv[6]))
+    main(sys.argv[1],sys.argv[2],sys.argv[3], sys.argv[4], sys.argv[5], int(sys.argv[6]), float(sys.argv[7]))
