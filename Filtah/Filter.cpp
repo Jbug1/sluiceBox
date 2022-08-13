@@ -30,6 +30,63 @@ bool Filter::Add(uint_fast64_t num)
 bool Filter::Check(uint_fast64_t num)
 {
 	//std::cout << "RESULT: " << ((*bits)[HashMethodA(num) % size] & (*bits)[HashMethodA(num) % size]) << std::endl;
-	return	(*bits)[HashMethodA(num) % size] & 
+	return	(*bits)[HashMethodA(num) % size] && 
 			(*bits)[HashMethodB(num) % size];
+}
+
+void Filter::PopulateFilter(std::string filename, int keysize)
+{							
+	int numSequences = 0;
+	std::ifstream fileReader(filename, std::ios::binary | std::ios::ate);			
+	std::string content;									
+	if (fileReader) {		
+		std::filesystem::path p{ filename };					
+		auto fileSize = std::filesystem::file_size(p);					
+		fileReader.seekg(std::ios::beg);						
+		content = std::string(fileSize, 0);					
+		fileReader.read(&content[0], fileSize);				
+	}
+	else
+	{
+		std::cout << "File load error with: " << filename << std::endl;
+	}
+	int beginning = 0;
+	int end = 0;
+	bool insideInfoLine = false;
+
+	uint_fast64_t convertedSequence;
+	std::vector<uint_fast64_t> sequenceBreaks;
+	int breakIndex = 0;
+
+	for (int i = 0; i < content.size(); ++i)											
+	{
+		if (insideInfoLine)
+		{
+			insideInfoLine = (content[i] != 10 && content[i] != 13) || content[i + 1] == 78 || content[i] == 78;
+			if (!insideInfoLine) 
+			{ 
+				beginning = i + 1;
+				end = beginning + keysize - 1;
+				std::cout << "BREAK" << std::endl;
+			}
+		}
+		else
+		{
+			int result = ConvertSequenceToInt(&content, beginning, &end, &convertedSequence);
+			if (result != -1) { i = result; insideInfoLine = true; }
+			else
+			{
+				beginning += 1;
+				end = beginning + keysize - 1;
+				
+				Add(convertedSequence);
+				++numSequences;
+				//std::bitset<64> rep(convertedSequence);
+				//std::cout << "INSERTING: " << rep << " | ";
+				//std::cout << convertedSequence << " | ";
+				//PrintSequence(convertedSequence);
+			}
+		}
+	}
+	std::cout << "RESULT: " << numSequences << std::endl;
 }

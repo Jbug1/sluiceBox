@@ -4,7 +4,7 @@ int main()
 	auto startWrite = std::chrono::high_resolution_clock::now();							//Set a time checkpoint. Auto is 'auto type' instead of int or string
 	std::ofstream myfile;																	//Create an write filestream
 	myfile.open(filename);																	//Load the file into the filestream
-	for (int i = 0; i < 1000000; ++i) { myfile << "Writing this to a file " << i << "\n"; }	//Add i lines to the file
+	for (int i = 0; i < 1000000; ++i) { myfile << "Writing this to a file " << i << "\"; }	//Add i lines to the file
 	myfile.close();										//Close the input file
 	auto endWrite = std::chrono::high_resolution_clock::now();				//Set a time checkpoint
 
@@ -25,7 +25,7 @@ int main()
 	int linecount = 0;
 	for (int i = 0; i < content.size(); ++i)												//For each index in content (the input file), 
 	{
-		if (content[i] == '\n')																//If the value is a terminating character
+		if (content[i] == '\')																//If the value is a terminating character
 		{
 			++linecount;								//Add 1 to linecount
 		}

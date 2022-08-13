@@ -31,5 +31,13 @@
     <Text Include="old.txt">
       <Filter>Source Files</Filter>
     </Text>
+    <Text Include="testinput.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="genome.fna">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

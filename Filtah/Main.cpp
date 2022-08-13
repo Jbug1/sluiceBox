@@ -1,32 +1,25 @@
-#include <fstream>
-#include <filesystem>
-#include <sstream>
-#include <string>
-#include <chrono>
-#include <bit>
-#include <bitset>
-#include <unordered_set>
-#include <time.h>
+#include "Filter.h"
 
 struct Pair
 {
 	float a, b;
 };
 
-#include "Filter.h"
+Filter filter(65000);
 
 Pair RandPopulate()
 {
 	Filter filter(65536);
 	std::srand(time(NULL));
-	float accuracy = 0;
 	const int numAdded = 10000;
-	const int range = 200000000;
+	const unsigned int range = 300000000;
 	std::unordered_set<int> addedNums;
 	std::cout << "Starting..." << std::endl;
+
 	for (int i = 0; i < numAdded; ++i)
 	{
 		int num = 0;
+
 		while (addedNums.count(num) != 0)
 		{
 			num = std::rand() % range;
@@ -36,15 +29,15 @@ Pair RandPopulate()
 		addedNums.insert(num);
 	}
 
-	//std::cout << "ADDED NUMS: " << addedNums.size() << std::endl;
-
+	std::cout << "ADDED NUMS: " << addedNums.size() << std::endl;
+	int accuracy = 0;
 	for (int i = 0; i < range; ++i)
 	{
-		//std::cout << "Checking " << i << " | " << (addedNums.count(i) == 1) << " " << filter.Check(i) << std::endl;
-		accuracy += ((addedNums.count(i) == 0) && filter.Check(i));
+		//std::cout << "Checking " << i << " | " << ((addedNums.count(i) == 0) && filter.Check(i)) << std::endl;
+		int a = addedNums.count(i) == 0; int b = a & filter.Check(i);
+		accuracy += b;
 	}
-	//std::cout << accuracy << std::endl;
-	std::cout << "False: " << float(accuracy / (range - numAdded)) << std::endl;
+	//std::cout << "False: " << float(float(accuracy) / (range - numAdded)) << std::endl;
 
 	float sum = 0;
 	for (int i = 0; i < filter.GetSize(); ++i)
@@ -54,23 +47,39 @@ Pair RandPopulate()
 	//std::cout << sum << " " << filter.Vec()->size() << std::endl;
 	//std::cout << "Bit ratio: " << float(sum / filter.Vec()->size()) << std::endl;
 
-	return { float(accuracy / (range - numAdded)),float(sum / filter.Vec()->size()) };
+	return { float(float(accuracy) / (range - numAdded)),float(sum / filter.Vec()->size()) };
 }
-
-int main()
+void BasicTest()
 {
 	//filter.Print();
+	const int testRuns = 1;
 	std::cout << "Start" << std::endl;
 	float accuracy = 0, bitalloc = 0;
-	for (int i = 0; i < 5; ++i)
+	for (int i = 0; i < testRuns; ++i)
 	{
 		Pair p = RandPopulate();
 		accuracy += p.a;
 		bitalloc += p.b;
 	}
-	
-	std::cout << "End: " << accuracy/5 << " | " << bitalloc/5 << std::endl;
+	std::cout << "End: " << accuracy / testRuns << " | " << bitalloc / testRuns << std::endl;
+}
+int main()
+{
 	//filter.Print();
+	std::string test = "AATAAATGCCGGATG";
+	uint_fast64_t num;
+	int s = test.size();
 
+	filter.ConvertSequenceToInt(&test, 0, &s, &num);
+	filter.PrintSequence(num);
+
+	std::bitset<64> rep(num);
+	std::cout << num << " " << rep << std::endl;
+
+	filter.PopulateFilter("genome.fna", 21);
+
+	std::cout << filter.Check(num) << std::endl;
 	return 0;
 }
+
+//5,153,189
