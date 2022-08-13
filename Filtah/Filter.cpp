@@ -23,33 +23,33 @@ bool Filter::Add(uint_fast64_t num)
 
 	(*bits)[HashMethodA(num) % size] = 1;
 	(*bits)[HashMethodB(num) % size] = 1;
-	
+
 	return val;
 }
 
 bool Filter::Check(uint_fast64_t num)
 {
 	//std::cout << "RESULT: " << ((*bits)[HashMethodA(num) % size] & (*bits)[HashMethodA(num) % size]) << std::endl;
-	return	(*bits)[HashMethodA(num) % size] && 
-			(*bits)[HashMethodB(num) % size];
+	return	(*bits)[HashMethodA(num) % size] &&
+		(*bits)[HashMethodB(num) % size];
 }
 
 void Filter::PopulateFilter(std::string filename, int keysize)
-{						
+{
 	std::ofstream myfile;
 	myfile.open("compareout.txt");
 
-									
+
 
 	int numSequences = 0;
-	std::ifstream fileReader(filename, std::ios::binary | std::ios::ate);			
-	std::string content;									
-	if (fileReader) {		
-		std::filesystem::path p{ filename };					
-		auto fileSize = std::filesystem::file_size(p);					
-		fileReader.seekg(std::ios::beg);						
-		content = std::string(fileSize, 0);					
-		fileReader.read(&content[0], fileSize);				
+	std::ifstream fileReader(filename, std::ios::binary | std::ios::ate);
+	std::string content;
+	if (fileReader) {
+		std::filesystem::path p{ filename };
+		auto fileSize = std::filesystem::file_size(p);
+		fileReader.seekg(std::ios::beg);
+		content = std::string(fileSize, 0);
+		fileReader.read(&content[0], fileSize);
 	}
 	else
 	{
@@ -63,28 +63,36 @@ void Filter::PopulateFilter(std::string filename, int keysize)
 	std::vector<uint_fast64_t> sequenceBreaks;
 	int breakIndex = 0;
 
-	for (int i = 0; i < content.size(); ++i)											
+	for (int i = 0; i < content.size(); ++i)
 	{
 		if (insideInfoLine)
 		{
-			insideInfoLine = (content[i] != 10 && content[i] != 13) || content[i + 1] == 78 || content[i] == 78;
-			if (!insideInfoLine) 
-			{ 
-				beginning = i + 1;
+			if (content[i] == 10 || content[i] == 13 || content[i] == 78)
+			{
+				continue;
+			}
+			else
+			{
+				beginning = i;
 				end = beginning + keysize - 1;
-				std::cout << "BREAK" << std::endl;
+				insideInfoLine = false;
 			}
 		}
 		else
 		{
 			int result = ConvertSequenceToInt(&content, beginning, &end, &convertedSequence);
-			if (result != -1) { i = result; insideInfoLine = true; }
+			if (result != -1)
+			{
+				i = result;
+				insideInfoLine = true;
+			}
 			else
 			{
 				beginning += 1;
 				end = beginning + keysize - 1;
-				
+
 				Add(convertedSequence);
+				std::cout << "ADDING: " << convertedSequence << std::endl;
 				++numSequences;
 				myfile << GetSequenceAsString(convertedSequence, keysize) << std::endl;
 				//std::bitset<64> rep(convertedSequence);
