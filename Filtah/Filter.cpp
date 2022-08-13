@@ -35,7 +35,12 @@ bool Filter::Check(uint_fast64_t num)
 }
 
 void Filter::PopulateFilter(std::string filename, int keysize)
-{							
+{						
+	std::ofstream myfile;
+	myfile.open("compareout.txt");
+
+									
+
 	int numSequences = 0;
 	std::ifstream fileReader(filename, std::ios::binary | std::ios::ate);			
 	std::string content;									
@@ -81,6 +86,7 @@ void Filter::PopulateFilter(std::string filename, int keysize)
 				
 				Add(convertedSequence);
 				++numSequences;
+				myfile << GetSequenceAsString(convertedSequence, keysize) << std::endl;
 				//std::bitset<64> rep(convertedSequence);
 				//std::cout << "INSERTING: " << rep << " | ";
 				//std::cout << convertedSequence << " | ";
@@ -88,5 +94,6 @@ void Filter::PopulateFilter(std::string filename, int keysize)
 			}
 		}
 	}
+	myfile.close();
 	std::cout << "RESULT: " << numSequences << std::endl;
 }

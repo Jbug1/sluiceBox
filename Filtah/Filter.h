@@ -48,10 +48,10 @@ public:
 		return -1;
 	}
 
-	inline void PrintSequence(uint_fast64_t seq)
+	inline void PrintSequence(uint_fast64_t seq, int size)
 	{
-		std::string s(15, 0);
-		for (int i = 14; i >= 0; --i)
+		std::string s(size, 0);
+		for (int i = size - 1; i >= 0; --i)
 		{
 			int c = 3 & seq;
 			switch (c)
@@ -66,6 +66,26 @@ public:
 			seq = seq >> 2;
 		}
 		std::cout << s << std::endl;
+	}
+
+	inline std::string GetSequenceAsString(uint_fast64_t seq, int size)
+	{
+		std::string s(size, 0);
+		for (int i = size - 1; i >= 0; --i)
+		{
+			int c = 3 & seq;
+			switch (c)
+			{
+			case 0:  s[i] = 'A';	break;
+			case 1:  s[i] = 'C';	break;
+			case 2:  s[i] = 'G';	break;
+			case 3:  s[i] = 'T';	break;
+			default:
+				return "";
+			}
+			seq = seq >> 2;
+		}
+		return s;
 	}
 
 private:
