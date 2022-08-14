@@ -25,9 +25,11 @@ public:
 
 	void PopulateFilter(std::string filename, int keysize);
 
-	inline int ConvertSequenceToInt(std::string* file, int s, int * e, uint_fast64_t* ref)
+	inline int ConvertSequenceToInt(std::string* file, int s, int * e, uint_fast64_t* ref, int* adjustments)
 	{
 		*ref = 0;
+		*adjustments = 0;
+		bool badStart = (*file)[s] == 10 || (*file)[s] == 13;
 		while (s <= *e)
 		{
 			switch ((*file)[s])
@@ -38,6 +40,7 @@ public:
 			case 'T':	*ref = (*ref) << 2; *ref |= 3;	break;
 			case 10:
 			case 13:
+						if (badStart) { ++(*adjustments); }
 						*e += 1; break;
 			default:
 				std::cout << int((*file)[s]) << std::endl;

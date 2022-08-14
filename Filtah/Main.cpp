@@ -66,19 +66,7 @@ void BasicTest()
 int main()
 {
 	//filter.Print();
-	std::string test = "AATAAATGCCGGATG";
-	uint_fast64_t num;
-	int s = test.size();
-
-	filter.ConvertSequenceToInt(&test, 0, &s, &num);
-	//filter.PrintSequence(num);
-
-	std::bitset<64> rep(num);
-	std::cout << num << " " << rep << std::endl;
-
 	filter.PopulateFilter("genome.fna", 15);
-
-	std::cout << filter.Check(num) << std::endl;
 	return 0;
 }
 

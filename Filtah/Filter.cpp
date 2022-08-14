@@ -62,6 +62,7 @@ void Filter::PopulateFilter(std::string filename, int keysize)
 	uint_fast64_t convertedSequence;
 	std::vector<uint_fast64_t> sequenceBreaks;
 	int breakIndex = 0;
+	int adjustments = 0;
 
 	for (int i = 0; i < content.size(); ++i)
 	{
@@ -69,10 +70,12 @@ void Filter::PopulateFilter(std::string filename, int keysize)
 		{
 			if (content[i] == 10 || content[i] == 13 || content[i] == 78)
 			{
+				std::cout << "BAD CHAR: " << content[i] << std::endl;
 				continue;
 			}
 			else
 			{
+				std::cout << "NEW SEQUENCE" << std::endl;
 				beginning = i;
 				end = beginning + keysize - 1;
 				insideInfoLine = false;
@@ -80,7 +83,7 @@ void Filter::PopulateFilter(std::string filename, int keysize)
 		}
 		else
 		{
-			int result = ConvertSequenceToInt(&content, beginning, &end, &convertedSequence);
+			int result = ConvertSequenceToInt(&content, beginning, &end, &convertedSequence, &adjustments);
 			if (result != -1)
 			{
 				i = result;
@@ -88,17 +91,18 @@ void Filter::PopulateFilter(std::string filename, int keysize)
 			}
 			else
 			{
-				beginning += 1;
+				std::cout << adjustments << std::endl;
+				beginning += 1 + adjustments;
 				end = beginning + keysize - 1;
 
 				Add(convertedSequence);
-				std::cout << "ADDING: " << convertedSequence << std::endl;
+				//std::cout << "ADDING: " << convertedSequence << std::endl;
 				++numSequences;
 				myfile << GetSequenceAsString(convertedSequence, keysize) << std::endl;
 				//std::bitset<64> rep(convertedSequence);
 				//std::cout << "INSERTING: " << rep << " | ";
 				//std::cout << convertedSequence << " | ";
-				//PrintSequence(convertedSequence);
+				//PrintSequence(convertedSequence, keysize);
 			}
 		}
 	}
