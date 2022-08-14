@@ -66,11 +66,14 @@ void Filter::PopulateFilter(std::string filename, int keysize)
 
 	for (int i = 0; i < content.size(); ++i)
 	{
-		if (insideInfoLine)
+		//Get rid of inside line thing
+		//if (insideInfoLine)
+		while(true)
 		{
-			if (content[i] == 10 || content[i] == 13 || content[i] == 78)
+			if (content[i] != 'A' && content[i] != 'C' && content[i] != 'G' && content[i] != 'T')
 			{
 				std::cout << "BAD CHAR: " << content[i] << std::endl;
+				++i; if (i == content.size()) { myfile.close(); return; }
 				continue;
 			}
 			else
@@ -78,11 +81,11 @@ void Filter::PopulateFilter(std::string filename, int keysize)
 				std::cout << "NEW SEQUENCE" << std::endl;
 				beginning = i;
 				end = beginning + keysize - 1;
-				insideInfoLine = false;
+				break;
 			}
 		}
-		else
-		{
+		//else
+		//{
 			int result = ConvertSequenceToInt(&content, beginning, &end, &convertedSequence, &adjustments);
 			if (result != -1)
 			{
@@ -104,7 +107,7 @@ void Filter::PopulateFilter(std::string filename, int keysize)
 				//std::cout << convertedSequence << " | ";
 				//PrintSequence(convertedSequence, keysize);
 			}
-		}
+		//}
 	}
 	myfile.close();
 	std::cout << "RESULT: " << numSequences << std::endl;
