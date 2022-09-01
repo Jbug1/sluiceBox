@@ -19,27 +19,33 @@ void Filter::Print()
 
 bool Filter::Add(uint_fast64_t num)
 {
-	bool val = (*bits)[num % size];
-
 	(*bits)[HashMethodA(num) % size] = 1;
 	(*bits)[HashMethodB(num) % size] = 1;
 
-	return val;
+	return false;
 }
 
 bool Filter::Check(uint_fast64_t num)
 {
 	//std::cout << "RESULT: " << ((*bits)[HashMethodA(num) % size] & (*bits)[HashMethodA(num) % size]) << std::endl;
 	return	(*bits)[HashMethodA(num) % size] &&
-		(*bits)[HashMethodB(num) % size];
+			(*bits)[HashMethodB(num) % size];
 }
 
 void Filter::PopulateFilter(std::string filename, int keysize)
 {
-	std::ofstream myfile;
-	myfile.open("compareout.txt");
-
-
+	bitmask = 0;
+	int maskSize = keysize * 2;
+	for (int i = 0; i < maskSize; ++i)
+	{
+		bitmask = bitmask << 1;
+		if ((i + 2) < maskSize)
+		{
+			++bitmask;
+		}
+	}
+	std::bitset<64> x(bitmask);
+	//std::cout << x << '\n';
 
 	int numSequences = 0;
 	std::ifstream fileReader(filename, std::ios::binary | std::ios::ate);
@@ -59,56 +65,50 @@ void Filter::PopulateFilter(std::string filename, int keysize)
 	int end = 0;
 	bool insideInfoLine = false;
 
-	uint_fast64_t convertedSequence;
+	uint_fast64_t convertedSequence = 0;
 	std::vector<uint_fast64_t> sequenceBreaks;
 	int breakIndex = 0;
 	int adjustments = 0;
+	bool optActive = false;
 
 	for (int i = 0; i < content.size(); ++i)
 	{
-		//Get rid of inside line thing
-		//if (insideInfoLine)
-		while(true)
+		while (true)
 		{
 			if (content[i] != 'A' && content[i] != 'C' && content[i] != 'G' && content[i] != 'T')
 			{
-				std::cout << "BAD CHAR: " << content[i] << std::endl;
-				++i; if (i == content.size()) { myfile.close(); return; }
+				//std::cout << "BAD CHAR: " << content[i] << std::endl;
+				++i; if (i == content.size()) { return; }
+				optActive = false;
 				continue;
 			}
 			else
 			{
-				std::cout << "NEW SEQUENCE" << std::endl;
+				//std::cout << "NEW SEQUENCE" << std::endl;
 				beginning = i;
 				end = beginning + keysize - 1;
 				break;
 			}
 		}
-		//else
-		//{
-			int result = ConvertSequenceToInt(&content, beginning, &end, &convertedSequence, &adjustments);
-			if (result != -1)
-			{
-				i = result;
-				insideInfoLine = true;
-			}
-			else
-			{
-				std::cout << adjustments << std::endl;
-				beginning += 1 + adjustments;
-				end = beginning + keysize - 1;
+		int result = optActive	?	ConvertSequenceToIntOPT(&content, end, &end, &convertedSequence, &adjustments)
+								:	ConvertSequenceToInt(&content, beginning, &end, &convertedSequence, &adjustments);
+		if (result != -1)
+		{
+			i = result;
+		}
+		else
+		{
+			beginning += 1 + adjustments;
+			end = beginning + keysize - 1;
 
-				Add(convertedSequence);
-				//std::cout << "ADDING: " << convertedSequence << std::endl;
-				++numSequences;
-				myfile << GetSequenceAsString(convertedSequence, keysize) << std::endl;
-				//std::bitset<64> rep(convertedSequence);
-				//std::cout << "INSERTING: " << rep << " | ";
-				//std::cout << convertedSequence << " | ";
-				//PrintSequence(convertedSequence, keysize);
+			if (convertedSequence == 1856485284)
+			{
+				std::cout << "??????????????????????????????????";
 			}
-		//}
+			Add(convertedSequence);
+			//PrintSequence(convertedSequence, keysize);
+			optActive = true;
+		}
 	}
-	myfile.close();
-	std::cout << "RESULT: " << numSequences << std::endl;
+	//std::cout << "RESULT: " << numSequences << std::endl;
 }

@@ -39,5 +39,8 @@
     <None Include="genome.fna">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="sampleinput.fastq">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

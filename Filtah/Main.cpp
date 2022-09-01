@@ -1,72 +1,133 @@
 #include "Filter.h"
 
-struct Pair
+enum DataFields
 {
-	float a, b;
+	METADATA = 0,
+	SEQUENCE = 1,
+	QUALITY = 3
 };
 
-Filter filter(65000);
-
-Pair RandPopulate()
+struct DataGroup
 {
-	Filter filter(65536);
-	std::srand(time(NULL));
-	const int numAdded = 10000;
-	const unsigned int range = 300000000;
-	std::unordered_set<int> addedNums;
-	std::cout << "Starting..." << std::endl;
-
-	for (int i = 0; i < numAdded; ++i)
+	DataGroup(int a, int b, int c, int d, int e, int f) :
+		metadata_s(a), metadata_e(b),
+		sequence_s(c), sequence_e(d),
+		quality_s(e), quality_e(f)
 	{
-		int num = 0;
 
-		while (addedNums.count(num) != 0)
-		{
-			num = std::rand() % range;
-		}
-		//std::cout << "Attempting to insert " << num << "..." << std::endl;
-		bool result = filter.Add(num);
-		addedNums.insert(num);
 	}
+		
+	int metadata_s, metadata_e;
+	int sequence_s, sequence_e;
+	int quality_s, quality_e;
+};
 
-	std::cout << "ADDED NUMS: " << addedNums.size() << std::endl;
-	int accuracy = 0;
-	for (int i = 0; i < range; ++i)
-	{
-		//std::cout << "Checking " << i << " | " << ((addedNums.count(i) == 0) && filter.Check(i)) << std::endl;
-		int a = addedNums.count(i) == 0; int b = a & filter.Check(i);
-		accuracy += b;
-	}
-	//std::cout << "False: " << float(float(accuracy) / (range - numAdded)) << std::endl;
-
-	float sum = 0;
-	for (int i = 0; i < filter.GetSize(); ++i)
-	{
-		sum += (*filter.Vec())[i];
-	}
-	//std::cout << sum << " " << filter.Vec()->size() << std::endl;
-	//std::cout << "Bit ratio: " << float(sum / filter.Vec()->size()) << std::endl;
-
-	return { float(float(accuracy) / (range - numAdded)),float(sum / filter.Vec()->size()) };
-}
-void BasicTest()
-{
-	//filter.Print();
-	const int testRuns = 1;
-	std::cout << "Start" << std::endl;
-	float accuracy = 0, bitalloc = 0;
-	for (int i = 0; i < testRuns; ++i)
-	{
-		Pair p = RandPopulate();
-		accuracy += p.a;
-		bitalloc += p.b;
-	}
-	std::cout << "End: " << accuracy / testRuns << " | " << bitalloc / testRuns << std::endl;
-}
 int main()
 {
-	//filter.Print();
-	filter.PopulateFilter("genome.fna", 15);
+	const int keysize = 18;
+
+	Filter f(10000000);
+	auto start = std::chrono::high_resolution_clock::now();
+	f.PopulateFilter("genome.fna", keysize);
+	auto end = std::chrono::high_resolution_clock::now();
+
+	const std::string filename = "sampleinput.fastq";
+	std::ifstream fileReader(filename, std::ios::binary | std::ios::ate);
+	std::string content;
+	if (fileReader) {
+		std::filesystem::path p{ filename };
+		auto fileSize = std::filesystem::file_size(p);
+		fileReader.seekg(std::ios::beg);
+		content = std::string(fileSize, 0);
+		fileReader.read(&content[0], fileSize);
+	}
+	else
+	{
+		std::cout << "File load error with: " << filename << std::endl;
+	}
+
+	int segments = 0;
+	for (int i = 0; i < content.size(); ++i)
+	{
+		if (content[i] == '+') { ++segments; }
+	}
+
+	std::vector<DataGroup> data;
+	data.reserve(segments);
+	int meta_s, meta_e;
+	int seq_s, seq_e;
+	int qual_s, qual_e;
+
+	std::cout << "SIZE: " << data.size();
+
+	int first = 0;
+	int counter = 0;
+
+	int cacheSize = content.size();
+	for (int i = 0; i < cacheSize; ++i)
+	{
+		bool eof = (i == cacheSize - 1);
+		if (content[i] == 10 || content[i] == 13 || eof)
+		{
+			switch (counter)
+			{
+			case METADATA:
+				meta_s = first;
+				meta_e = i - 1;
+				break;
+			case SEQUENCE:
+				seq_s = first;
+				seq_e = i - 1;
+				break;
+			case QUALITY:
+				qual_s = first;
+				qual_e = i - 1;
+
+				data.emplace_back(meta_s, meta_e, seq_s, seq_e, qual_s, qual_e);
+				break;
+			default:
+				//skip '+'
+				break;
+			}
+			if (!eof)
+			{
+				++counter;
+				counter %= 4;
+				while (content[i] == 10 || content[i] == 13)
+				{
+					++i;
+				}
+				first = i;
+				--i;
+			}
+		}
+	}
+
+	std::cout << "SIZE: " << data.size() << std::endl;
+
+	int holdover;
+	int endpoint;
+	for (int i = 0; i < data.size(); ++i)
+	{
+		for (int j = data[i].sequence_s; j <= data[i].sequence_e - keysize + 1; )
+		{
+			uint_fast64_t conversion = 0;
+			endpoint = j + keysize - 1;
+			f.ConvertSequenceToInt(&content, j, &endpoint, &conversion, &holdover);
+			if (f.Check(conversion)) 
+			{ 
+				std::cout << "----FOUND: "; 
+			}
+			else
+			{
+				std::cout << "NOT FOUND: " << conversion << " ";
+			}
+			f.PrintSequence(conversion, keysize);
+			j += keysize;
+		}
+		std::cout << std::endl;
+	}
+
 	return 0;
 }
 

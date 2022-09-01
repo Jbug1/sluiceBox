@@ -25,7 +25,7 @@ public:
 
 	void PopulateFilter(std::string filename, int keysize);
 
-	inline int ConvertSequenceToInt(std::string* file, int s, int * e, uint_fast64_t* ref, int* adjustments)
+	inline int ConvertSequenceToInt(std::string* file, int s, int* e, uint_fast64_t* ref, int* adjustments)
 	{
 		*ref = 0;
 		*adjustments = 0;
@@ -40,17 +40,40 @@ public:
 			case 'T':	*ref = (*ref) << 2; *ref |= 3;	break;
 			case 10:
 			case 13:
-						if (badStart) { ++(*adjustments); }
-						*e += 1; break;
+				if (badStart) { ++(*adjustments); }
+				*e += 1; break;
 			default:
-				std::cout << int((*file)[s]) << std::endl;
+				//std::cout << int((*file)[s]) << std::endl;
 				return s;
 			}
 			++s;
 		}
 		return -1;
 	}
-
+	inline int ConvertSequenceToIntOPT(std::string* file, int s, int* e, uint_fast64_t* ref, int* adjustments)
+	{
+		*adjustments = 0;
+		bool badStart = (*file)[s] == 10 || (*file)[s] == 13;
+		while (true)
+		{
+			switch ((*file)[s])
+			{
+			case 'A':	*ref = (*ref) << 2; *ref = *ref & bitmask; *ref |= 0; return -1;
+			case 'C':	*ref = (*ref) << 2; *ref = *ref & bitmask; *ref |= 1; return -1;
+			case 'G':	*ref = (*ref) << 2; *ref = *ref & bitmask; *ref |= 2; return -1;
+			case 'T':	*ref = (*ref) << 2; *ref = *ref & bitmask; *ref |= 3; return -1;
+			case 10:
+			case 13:
+				if (badStart) { ++(*adjustments); }
+				*e += 1; break;
+			default:
+				//std::cout << int((*file)[s]) << std::endl;
+				return s;
+			}
+			++s;
+		}
+		return -1;
+	}
 	inline void PrintSequence(uint_fast64_t seq, int size)
 	{
 		std::string s(size, 0);
@@ -70,7 +93,6 @@ public:
 		}
 		std::cout << s << std::endl;
 	}
-
 	inline std::string GetSequenceAsString(uint_fast64_t seq, int size)
 	{
 		std::string s(size, 0);
@@ -96,9 +118,8 @@ private:
 	inline uint_fast64_t HashMethodA(uint_fast64_t num) { return num; }
 	inline uint_fast64_t HashMethodB(uint_fast64_t num) { return std::hash<uint_fast64_t>{}(num); }
 
-	
-
 	const int size = 0;
+	int bitmask = 0;
 	//std::bitset<1> * bits;
-	std::vector<bool> * bits;
+	std::vector<bool>* bits;
 };
