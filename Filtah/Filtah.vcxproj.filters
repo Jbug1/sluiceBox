@@ -42,5 +42,11 @@
     <None Include="sampleinput.fastq">
       <Filter>Resource Files</Filter>
     </None>
+    <None Include="formattedOutput.fastq">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="SRR19897826.fastq">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

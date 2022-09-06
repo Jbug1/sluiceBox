@@ -117,9 +117,11 @@ private:
 
 	inline uint_fast64_t HashMethodA(uint_fast64_t num) { return num; }
 	inline uint_fast64_t HashMethodB(uint_fast64_t num) { return std::hash<uint_fast64_t>{}(num); }
+	inline uint_fast64_t HashMethodC(uint_fast64_t num) { return num; }
+	inline uint_fast64_t HashMethodD(uint_fast64_t num) { return num; }
 
 	const int size = 0;
-	int bitmask = 0;
+	uint_fast64_t bitmask = 0;
 	//std::bitset<1> * bits;
 	std::vector<bool>* bits;
 };

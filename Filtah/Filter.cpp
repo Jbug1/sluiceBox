@@ -21,19 +21,23 @@ bool Filter::Add(uint_fast64_t num)
 {
 	(*bits)[HashMethodA(num) % size] = 1;
 	(*bits)[HashMethodB(num) % size] = 1;
+	(*bits)[HashMethodC(num) % size] = 1;
+	(*bits)[HashMethodD(num) % size] = 1;
 
 	return false;
 }
 
 bool Filter::Check(uint_fast64_t num)
 {
-	//std::cout << "RESULT: " << ((*bits)[HashMethodA(num) % size] & (*bits)[HashMethodA(num) % size]) << std::endl;
 	return	(*bits)[HashMethodA(num) % size] &&
-			(*bits)[HashMethodB(num) % size];
+			(*bits)[HashMethodB(num) % size] &&
+			(*bits)[HashMethodC(num) % size] && 
+			(*bits)[HashMethodD(num) % size];
 }
 
 void Filter::PopulateFilter(std::string filename, int keysize)
 {
+	std::cout << "Filter Start" << std::endl;
 	bitmask = 0;
 	int maskSize = keysize * 2;
 	for (int i = 0; i < maskSize; ++i)
@@ -44,8 +48,6 @@ void Filter::PopulateFilter(std::string filename, int keysize)
 			++bitmask;
 		}
 	}
-	std::bitset<64> x(bitmask);
-	//std::cout << x << '\n';
 
 	int numSequences = 0;
 	std::ifstream fileReader(filename, std::ios::binary | std::ios::ate);
@@ -70,27 +72,25 @@ void Filter::PopulateFilter(std::string filename, int keysize)
 	int breakIndex = 0;
 	int adjustments = 0;
 	bool optActive = false;
-
+	std::cout << "Filter iteration start" << std::endl;
 	for (int i = 0; i < content.size(); ++i)
 	{
 		while (true)
 		{
 			if (content[i] != 'A' && content[i] != 'C' && content[i] != 'G' && content[i] != 'T')
 			{
-				//std::cout << "BAD CHAR: " << content[i] << std::endl;
 				++i; if (i == content.size()) { return; }
 				optActive = false;
 				continue;
 			}
 			else
 			{
-				//std::cout << "NEW SEQUENCE" << std::endl;
 				beginning = i;
 				end = beginning + keysize - 1;
 				break;
 			}
 		}
-		int result = optActive	?	ConvertSequenceToIntOPT(&content, end, &end, &convertedSequence, &adjustments)
+		int result = optActive ?	ConvertSequenceToIntOPT(&content, end, &end, &convertedSequence, &adjustments)
 								:	ConvertSequenceToInt(&content, beginning, &end, &convertedSequence, &adjustments);
 		if (result != -1)
 		{
@@ -101,14 +101,18 @@ void Filter::PopulateFilter(std::string filename, int keysize)
 			beginning += 1 + adjustments;
 			end = beginning + keysize - 1;
 
-			if (convertedSequence == 1856485284)
-			{
-				std::cout << "??????????????????????????????????";
-			}
 			Add(convertedSequence);
-			//PrintSequence(convertedSequence, keysize);
 			optActive = true;
 		}
 	}
-	//std::cout << "RESULT: " << numSequences << std::endl;
+
+	/*uint64_t count = 0;
+	for (int i = 0; i < size; ++i)
+	{
+		if ((*bits)[i] == 1)
+		{
+			++count;
+		}
+	}*/
+	std::cout << "Filter done" << std::endl;
 }

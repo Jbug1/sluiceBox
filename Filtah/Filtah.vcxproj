@@ -158,8 +158,10 @@
     <Text Include="testinput.txt" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="formattedOutput.fastq" />
     <None Include="genome.fna" />
     <None Include="sampleinput.fastq" />
+    <None Include="SRR19897826.fastq" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,5 +1,7 @@
 #include "Filter.h"
 
+int BUFFERINDEX = 0;
+
 enum DataFields
 {
 	METADATA = 0,
@@ -22,28 +24,47 @@ struct DataGroup
 	int quality_s, quality_e;
 };
 
+void WriteFromBuffer(char * buffer_target, std::string * buffer_source, int s, int e)
+{
+	int j = s;
+	for (int i = BUFFERINDEX; i <= BUFFERINDEX + (e-s+1); ++i)
+	{
+		//run tests here for speed
+		buffer_target[i] = (*buffer_source)[j];
+		++j;
+	}
+	BUFFERINDEX += e - s + 1;
+	buffer_target[BUFFERINDEX] = '\n';
+	++BUFFERINDEX;
+}
+
 int main()
 {
+	uintmax_t inputfilesize;
 	const int keysize = 18;
 
-	Filter f(10000000);
+	Filter f(1000000000);
+
 	auto start = std::chrono::high_resolution_clock::now();
 	f.PopulateFilter("genome.fna", keysize);
 	auto end = std::chrono::high_resolution_clock::now();
 
-	const std::string filename = "sampleinput.fastq";
+	const std::string filename = "SRR19897826.fastq";
 	std::ifstream fileReader(filename, std::ios::binary | std::ios::ate);
 	std::string content;
 	if (fileReader) {
 		std::filesystem::path p{ filename };
 		auto fileSize = std::filesystem::file_size(p);
+		inputfilesize = fileSize;
 		fileReader.seekg(std::ios::beg);
 		content = std::string(fileSize, 0);
 		fileReader.read(&content[0], fileSize);
+		//fileReader.close();
 	}
 	else
 	{
 		std::cout << "File load error with: " << filename << std::endl;
+		return 1;
 	}
 
 	int segments = 0;
@@ -82,7 +103,6 @@ int main()
 			case QUALITY:
 				qual_s = first;
 				qual_e = i - 1;
-
 				data.emplace_back(meta_s, meta_e, seq_s, seq_e, qual_s, qual_e);
 				break;
 			default:
@@ -103,7 +123,15 @@ int main()
 		}
 	}
 
+	//
+
 	std::cout << "SIZE: " << data.size() << std::endl;
+
+	//This should inherit the file format from the input
+	const std::string finalout_name = "formattedOutput.fastq";
+	std::ofstream finalout_file;
+	finalout_file.open(finalout_name);
+	char* finalout_buffer = new char[inputfilesize];
 
 	int holdover;
 	int endpoint;
@@ -116,17 +144,34 @@ int main()
 			f.ConvertSequenceToInt(&content, j, &endpoint, &conversion, &holdover);
 			if (f.Check(conversion)) 
 			{ 
-				std::cout << "----FOUND: "; 
+				//std::cout << "----FOUND: " << conversion << " ";
+				WriteFromBuffer(finalout_buffer, &content, data[i].metadata_s, data[i].metadata_e);
+				WriteFromBuffer(finalout_buffer, &content, data[i].sequence_s, data[i].sequence_e);
+				finalout_buffer[BUFFERINDEX] = '+';
+				finalout_buffer[BUFFERINDEX + 1] = '\n';
+				BUFFERINDEX += 2;
+				WriteFromBuffer(finalout_buffer, &content, data[i].quality_s, data[i].quality_e);
+				break;
 			}
 			else
 			{
-				std::cout << "NOT FOUND: " << conversion << " ";
+				//std::cout << "NOT FOUND: " << conversion << " ";
 			}
-			f.PrintSequence(conversion, keysize);
+			//f.PrintSequence(conversion, keysize);
 			j += keysize;
 		}
-		std::cout << std::endl;
 	}
+
+	std::cout << "Prepping output" << std::endl;
+
+	for (int i = BUFFERINDEX; i < inputfilesize; ++i)
+	{
+		finalout_buffer[i] = 0;
+	}
+	std::cout << "Prep finished" << std::endl;
+
+	finalout_file << finalout_buffer;
+	finalout_file.close();
 
 	return 0;
 }
