@@ -14,7 +14,7 @@
 class Filter
 {
 public:
-	Filter(int s);
+	Filter(int size, std::string genome, int keysize);
 
 	void Print();
 	bool Add(uint_fast64_t num);
@@ -121,6 +121,7 @@ private:
 	inline uint_fast64_t HashMethodD(uint_fast64_t num) { return num; }
 
 	const int size = 0;
+	const int keysize = 0;
 	uint_fast64_t bitmask = 0;
 	//std::bitset<1> * bits;
 	std::vector<bool>* bits;

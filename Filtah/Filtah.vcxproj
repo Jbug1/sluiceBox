@@ -147,10 +147,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="FileHandler.cpp" />
     <ClCompile Include="Filter.cpp" />
     <ClCompile Include="Main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DataTypes.h" />
+    <ClInclude Include="FileHandler.h" />
     <ClInclude Include="Filter.h" />
   </ItemGroup>
   <ItemGroup>

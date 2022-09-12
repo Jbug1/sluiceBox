@@ -1,11 +1,13 @@
 #include "Filter.h"
 
-Filter::Filter(int s) :
-	size(s)
+Filter::Filter(int size, std::string genome, int keysize) :
+	size(size),
+	keysize(keysize)
 {
 	bits = new std::vector<bool>();
 	bits->resize(size);
 	std::cout << "Filter created, with size " << bits->size() << std::endl;
+	PopulateFilter(genome, keysize);
 }
 
 void Filter::Print()
@@ -62,6 +64,7 @@ void Filter::PopulateFilter(std::string filename, int keysize)
 	else
 	{
 		std::cout << "File load error with: " << filename << std::endl;
+		abort();
 	}
 	int beginning = 0;
 	int end = 0;
@@ -105,14 +108,5 @@ void Filter::PopulateFilter(std::string filename, int keysize)
 			optActive = true;
 		}
 	}
-
-	/*uint64_t count = 0;
-	for (int i = 0; i < size; ++i)
-	{
-		if ((*bits)[i] == 1)
-		{
-			++count;
-		}
-	}*/
 	std::cout << "Filter done" << std::endl;
 }
