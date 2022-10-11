@@ -106,7 +106,7 @@ void Filter::PopulateFilter(std::string filename, int keysize)
 	int beginning = 0, end = 0, adjustments = 0;
 	uint_fast64_t convertedSequence = 0;
 	bool optActive = false;
-
+	int numAdded = 0;
 	std::cout << "Filter iteration start" << std::endl;
 	for (int i = 0; i < genome.content.size(); ++i)
 	{
@@ -134,7 +134,8 @@ void Filter::PopulateFilter(std::string filename, int keysize)
 			end = beginning + keysize - 1;
 			Add(convertedSequence);
 			optActive = true;
+			++numAdded;
 		}
 	}
-	std::cout << "Filter done" << std::endl;
+	std::cout << "Filter done " << numAdded << std::endl;
 }
