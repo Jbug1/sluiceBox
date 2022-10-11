@@ -1,6 +1,30 @@
 #pragma once
 #include "FileHandler.h"
 
+struct BufferWriter
+{
+	uint_fast64_t index = 0;
+	void Write(char* buffer_target, std::string* buffer_source, int s, int e)
+	{
+		int j = s;
+		for (int i = index; i <= index + (e - s + 1); ++i)
+		{
+			//run tests here for speed
+			buffer_target[i] = (*buffer_source)[j];
+			++j;
+		}
+		index += e - s + 1;
+		buffer_target[index] = '\n';
+		++index;
+	}
+	void AddPlus(char* buffer_target)
+	{
+		buffer_target[index] = '+';
+		buffer_target[index + 1] = '\n';
+		index += 2;
+	}
+};
+
 enum DataFields
 {
 	METADATA = 0,

@@ -1,23 +1,6 @@
 #include "Filter.h"
 #include "DataTypes.h"
 
-
-int BUFFERINDEX = 0;
-
-void WriteFromBuffer(char* buffer_target, std::string* buffer_source, int s, int e)
-{
-	int j = s;
-	for (int i = BUFFERINDEX; i <= BUFFERINDEX + (e - s + 1); ++i)
-	{
-		//run tests here for speed
-		buffer_target[i] = (*buffer_source)[j];
-		++j;
-	}
-	BUFFERINDEX += e - s + 1;
-	buffer_target[BUFFERINDEX] = '\n';
-	++BUFFERINDEX;
-}
-
 int main()
 {
 	auto startProgramTimer = std::chrono::high_resolution_clock::now();
@@ -45,9 +28,8 @@ int main()
 	char* finalout_buffer = new char[transcriptome.filesize];
 	memset(finalout_buffer, 0, transcriptome.filesize);
 
-	int holdover;
-	int endpoint;
-	int flex;
+	int holdover, endpoint, flex;
+	BufferWriter bufferTool;
 	for (int i = 0; i < data.size(); ++i)
 	{
 		flex = 0;
@@ -58,13 +40,10 @@ int main()
 			filter.ConvertSequenceToInt(&transcriptome.content, j, &endpoint, &conversion, &holdover);
 			if (filter.Check(conversion))
 			{
-				//std::cout << "----FOUND: " << conversion << " ";
-				WriteFromBuffer(finalout_buffer, &transcriptome.content, data[i].metadata_s, data[i].metadata_e);
-				WriteFromBuffer(finalout_buffer, &transcriptome.content, data[i].sequence_s, data[i].sequence_e);
-				finalout_buffer[BUFFERINDEX] = '+';
-				finalout_buffer[BUFFERINDEX + 1] = '\n';
-				BUFFERINDEX += 2;
-				WriteFromBuffer(finalout_buffer, &transcriptome.content, data[i].quality_s, data[i].quality_e);
+				bufferTool.Write(finalout_buffer, &transcriptome.content, data[i].metadata_s, data[i].metadata_e);
+				bufferTool.Write(finalout_buffer, &transcriptome.content, data[i].sequence_s, data[i].sequence_e);
+				bufferTool.AddPlus(finalout_buffer);
+				bufferTool.Write(finalout_buffer, &transcriptome.content, data[i].quality_s, data[i].quality_e);
 				break;
 			}
 			j += keysize;

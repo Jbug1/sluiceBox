@@ -2,11 +2,13 @@
 
 FileHandler::FileHandler(std::string transcriptome)
 {
-	std::ifstream fileReader(transcriptome, std::ios::binary | std::ios::ate);
+	std::ifstream fileReader(transcriptome, std::ios::binary);
 	if (fileReader) {
 		std::filesystem::path p{ transcriptome };
 		filesize = std::filesystem::file_size(p);
-		fileReader.seekg(std::ios::beg);
+		fileReader.seekg(cursor, std::ios::beg);
+
+		std::cout << "FILE SIZE: " << filesize << std::endl;
 		content = std::string(filesize, 0);
 		fileReader.read(&content[0], filesize);
 		fileReader.close();

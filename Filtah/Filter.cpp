@@ -37,6 +37,56 @@ bool Filter::Check(uint_fast64_t num)
 			(*bits)[HashMethodD(num) % size];
 }
 
+int Filter::ConvertSequenceToInt(std::string* file, int s, int* e, uint_fast64_t* ref, int* adjustments)
+{
+	*ref = 0;
+	*adjustments = 0;
+	bool badStart = (*file)[s] == 10 || (*file)[s] == 13;
+	while (s <= *e)
+	{
+		switch ((*file)[s])
+		{
+		case 'A':	*ref = (*ref) << 2; *ref |= 0;	break;
+		case 'C':	*ref = (*ref) << 2; *ref |= 1;	break;
+		case 'G':	*ref = (*ref) << 2; *ref |= 2;	break;
+		case 'T':	*ref = (*ref) << 2; *ref |= 3;	break;
+		case 10:
+		case 13:
+			if (badStart) { ++(*adjustments); }
+			*e += 1; break;
+		default:
+			//std::cout << int((*file)[s]) << std::endl;
+			return s;
+		}
+		++s;
+	}
+	return -1;
+}
+int Filter::ConvertSequenceToIntOPT(std::string* file, int s, int* e, uint_fast64_t* ref, int* adjustments)
+{
+	*adjustments = 0;
+	bool badStart = (*file)[s] == 10 || (*file)[s] == 13;
+	while (true)
+	{
+		switch ((*file)[s])
+		{
+		case 'A':	*ref = (*ref) << 2; *ref = *ref & bitmask; *ref |= 0; return -1;
+		case 'C':	*ref = (*ref) << 2; *ref = *ref & bitmask; *ref |= 1; return -1;
+		case 'G':	*ref = (*ref) << 2; *ref = *ref & bitmask; *ref |= 2; return -1;
+		case 'T':	*ref = (*ref) << 2; *ref = *ref & bitmask; *ref |= 3; return -1;
+		case 10:
+		case 13:
+			if (badStart) { ++(*adjustments); }
+			*e += 1; break;
+		default:
+			//std::cout << int((*file)[s]) << std::endl;
+			return s;
+		}
+		++s;
+	}
+	return -1;
+}
+
 void Filter::PopulateFilter(std::string filename, int keysize)
 {
 	std::cout << "Filter Start" << std::endl;
@@ -51,38 +101,20 @@ void Filter::PopulateFilter(std::string filename, int keysize)
 		}
 	}
 
-	int numSequences = 0;
-	std::ifstream fileReader(filename, std::ios::binary | std::ios::ate);
-	std::string content;
-	if (fileReader) {
-		std::filesystem::path p{ filename };
-		auto fileSize = std::filesystem::file_size(p);
-		fileReader.seekg(std::ios::beg);
-		content = std::string(fileSize, 0);
-		fileReader.read(&content[0], fileSize);
-	}
-	else
-	{
-		std::cout << "File load error with: " << filename << std::endl;
-		abort();
-	}
-	int beginning = 0;
-	int end = 0;
-	bool insideInfoLine = false;
+	FileHandler genome(filename);
 
+	int beginning = 0, end = 0, adjustments = 0;
 	uint_fast64_t convertedSequence = 0;
-	std::vector<uint_fast64_t> sequenceBreaks;
-	int breakIndex = 0;
-	int adjustments = 0;
 	bool optActive = false;
+
 	std::cout << "Filter iteration start" << std::endl;
-	for (int i = 0; i < content.size(); ++i)
+	for (int i = 0; i < genome.content.size(); ++i)
 	{
 		while (true)
 		{
-			if (content[i] != 'A' && content[i] != 'C' && content[i] != 'G' && content[i] != 'T')
+			if (genome.content[i] != 'A' && genome.content[i] != 'C' && genome.content[i] != 'G' && genome.content[i] != 'T')
 			{
-				++i; if (i == content.size()) { return; }
+				++i; if (i == genome.content.size()) { return; }
 				optActive = false;
 				continue;
 			}
@@ -93,17 +125,13 @@ void Filter::PopulateFilter(std::string filename, int keysize)
 				break;
 			}
 		}
-		int result = optActive ?	ConvertSequenceToIntOPT(&content, end, &end, &convertedSequence, &adjustments)
-								:	ConvertSequenceToInt(&content, beginning, &end, &convertedSequence, &adjustments);
-		if (result != -1)
-		{
-			i = result;
-		}
+		int result = optActive ?	ConvertSequenceToIntOPT(&genome.content, end, &end, &convertedSequence, &adjustments)
+							   :	ConvertSequenceToInt(&genome.content, beginning, &end, &convertedSequence, &adjustments);
+		if (result != -1) { i = result; }
 		else
 		{
 			beginning += 1 + adjustments;
 			end = beginning + keysize - 1;
-
 			Add(convertedSequence);
 			optActive = true;
 		}
