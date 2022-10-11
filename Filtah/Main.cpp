@@ -36,17 +36,17 @@ int main()
 	{
 		transcriptome.ProcessNextChunk(); //Gets chunk
 		data.emplace_back();
-		data.reserve(transcriptome.readcount);
-		printf("Reserving space for %d elements\n", transcriptome.readcount);
 
 		std::vector<DataGroup>& currData = data[filechunkIter];
+		currData.reserve(transcriptome.readcount);
+		printf("Reserving space for %d elements\n", transcriptome.readcount);
 		RetrieveReads(&transcriptome, currData);
 
 		memset(finalout_buffer, 0, transcriptome.GetRealSize());
 
 		int holdover, endpoint, flex;
 		BufferWriter bufferTool;
-		for (int i = 0; i < data.size(); ++i)
+		for (int i = 0; i < currData.size(); ++i)
 		{
 			flex = 0;
 			for (int j = currData[i].sequence_s; j <= currData[i].sequence_e - keysize + 1; )
