@@ -47,13 +47,13 @@ struct DataGroup
 	int quality_s, quality_e;
 };
 
-void RetrieveReads(FileHandler * transcriptome, std::vector<DataGroup> * data)
+void RetrieveReads(FileHandler * transcriptome, std::vector<DataGroup> & data)
 {
 	int meta_s, meta_e;
 	int seq_s, seq_e;
 	int qual_s, qual_e;
 	int first = 0, counter = 0;
-	int cacheSize = transcriptome->content.size();
+	int cacheSize = transcriptome->GetRealSize();
 
 	for (int i = 0; i < cacheSize; ++i)
 	{
@@ -68,7 +68,7 @@ void RetrieveReads(FileHandler * transcriptome, std::vector<DataGroup> * data)
 				seq_s = first;  seq_e = i - 1;  break;
 			case QUALITY:
 				qual_s = first;	qual_e = i - 1;
-				data->emplace_back(meta_s, meta_e, seq_s, seq_e, qual_s, qual_e);
+				data.emplace_back(meta_s, meta_e, seq_s, seq_e, qual_s, qual_e);
 				break;
 			default:
 				break; //skip '+'

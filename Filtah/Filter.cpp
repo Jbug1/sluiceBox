@@ -102,19 +102,21 @@ void Filter::PopulateFilter(std::string filename, int keysize)
 	}
 
 	FileHandler genome(filename);
+	genome.ProcessNextChunk();
 
 	int beginning = 0, end = 0, adjustments = 0;
 	uint_fast64_t convertedSequence = 0;
 	bool optActive = false;
 	int numAdded = 0;
 	std::cout << "Filter iteration start" << std::endl;
-	for (int i = 0; i < genome.content.size(); ++i)
+	int numAdded = 0;
+	for (int i = 0; i < genome.GetRealSize(); ++i)
 	{
 		while (true)
 		{
 			if (genome.content[i] != 'A' && genome.content[i] != 'C' && genome.content[i] != 'G' && genome.content[i] != 'T')
 			{
-				++i; if (i == genome.content.size()) { return; }
+				++i; if (i == genome.GetRealSize()) { return; }
 				optActive = false;
 				continue;
 			}
@@ -133,9 +135,10 @@ void Filter::PopulateFilter(std::string filename, int keysize)
 			beginning += 1 + adjustments;
 			end = beginning + keysize - 1;
 			Add(convertedSequence);
+			++numAdded;
 			optActive = true;
 			++numAdded;
 		}
 	}
-	std::cout << "Filter done " << numAdded << std::endl;
+	std::cout << "Filter done, added " << numAdded << std::endl;
 }
