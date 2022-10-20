@@ -12,7 +12,7 @@ int main()
 	const int flexfactor = 1;
 	const uint_fast64_t filterSize = 1000000000;
 	const std::string genomeFile = "genome.fna";
-	const std::string transcriptomeFile = "SRR19897826.fastq";
+	const std::string transcriptomeFile = "SRR19897826_trim.fastq";
 	const std::string fileExtension = transcriptomeFile.substr(transcriptomeFile.size() - 6); //this is ass
 	std::cout << "Genome file initializing" << std::endl;
 	Filter filter(filterSize, genomeFile, keysize);
