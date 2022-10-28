@@ -62,29 +62,21 @@ int Filter::ConvertSequenceToInt(std::string* file, int s, int* e, uint_fast64_t
 	}
 	return -1;
 }
-int Filter::ConvertSequenceToIntOPT(std::string* file, int s, int* e, uint_fast64_t* ref, int* adjustments)
+int Filter::ConvertSequenceToIntOPT(std::string* file, int s, uint_fast64_t* ref)
 {
-	*adjustments = 0;
-	bool badStart = (*file)[s] == 10 || (*file)[s] == 13;
-	while (true)
+	switch ((*file)[s])
 	{
-		switch ((*file)[s])
-		{
-		case 'A':	*ref = (*ref) << 2; *ref = *ref & bitmask; *ref |= 0; return -1;
-		case 'C':	*ref = (*ref) << 2; *ref = *ref & bitmask; *ref |= 1; return -1;
-		case 'G':	*ref = (*ref) << 2; *ref = *ref & bitmask; *ref |= 2; return -1;
-		case 'T':	*ref = (*ref) << 2; *ref = *ref & bitmask; *ref |= 3; return -1;
-		case 10:
-		case 13:
-			if (badStart) { ++(*adjustments); }
-			*e += 1; break;
-		default:
-			//std::cout << int((*file)[s]) << std::endl;
-			return s;
-		}
-		++s;
+	case 'A':	*ref = (*ref) << 2; *ref = *ref & bitmask; *ref |= 0; return 0;
+	case 'C':	*ref = (*ref) << 2; *ref = *ref & bitmask; *ref |= 1; return 0;
+	case 'G':	*ref = (*ref) << 2; *ref = *ref & bitmask; *ref |= 2; return 0;
+	case 'T':	*ref = (*ref) << 2; *ref = *ref & bitmask; *ref |= 3; return 0;
+	case 10:
+	case 13:
+		return 1;
+		break;
+	default:
+		return -1;
 	}
-	return -1;
 }
 
 void Filter::PopulateFilter(std::string filename, int keysize)
@@ -101,41 +93,33 @@ void Filter::PopulateFilter(std::string filename, int keysize)
 		}
 	}
 
+	std::ofstream finalout_file;
+	finalout_file.open("DEBUG_FILTERSEQUENCES.txt");
+
 	FileHandler genome(filename);
 	genome.ProcessNextChunk();
 
-	int beginning = 0, end = 0, adjustments = 0;
 	uint_fast64_t convertedSequence = 0;
-	bool optActive = false;
 	int numAdded = 0;
+	int shiftedIter = 0;
 	std::cout << "Filter iteration start" << std::endl;
 	for (int i = 0; i < genome.GetRealSize(); ++i)
 	{
-		while (true)
+		int result = ConvertSequenceToIntOPT(&genome.content, i, &convertedSequence);
+		if (result == -1)
 		{
-			if (genome.content[i] != 'A' && genome.content[i] != 'C' && genome.content[i] != 'G' && genome.content[i] != 'T')
-			{
-				++i; if (i == genome.GetRealSize()) { return; }
-				optActive = false;
-				continue;
-			}
-			else
-			{
-				beginning = i;
-				end = beginning + keysize - 1;
-				break;
-			}
+			convertedSequence = 0;
+			shiftedIter = 0;
 		}
-		int result = optActive ?	ConvertSequenceToIntOPT(&genome.content, end, &end, &convertedSequence, &adjustments)
-							   :	ConvertSequenceToInt(&genome.content, beginning, &end, &convertedSequence, &adjustments);
-		if (result != -1) { i = result; }
-		else
+		else if (result == 0)
 		{
-			beginning += 1 + adjustments;
-			end = beginning + keysize - 1;
-			Add(convertedSequence);
-			++numAdded;
-			optActive = true;
+			++shiftedIter;
+			if (shiftedIter == keysize)
+			{
+				--shiftedIter;
+				Add(convertedSequence);
+				++numAdded;
+			}
 		}
 	}
 	std::cout << "Filter done, added " << numAdded << std::endl;

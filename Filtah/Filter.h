@@ -19,7 +19,7 @@ public:
 	void PopulateFilter(std::string filename, int keysize);
 
 	int ConvertSequenceToInt(std::string* file, int s, int* e, uint_fast64_t* ref, int* adjustments);
-	int ConvertSequenceToIntOPT(std::string* file, int s, int* e, uint_fast64_t* ref, int* adjustments);
+	int ConvertSequenceToIntOPT(std::string* file, int s, uint_fast64_t* ref);
 
 	inline void PrintSequence(uint_fast64_t seq, int size)
 	{

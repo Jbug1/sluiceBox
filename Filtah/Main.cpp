@@ -12,7 +12,7 @@ int main()
 	const int flexfactor = 1;
 	const uint_fast64_t filterSize = 1000000000;
 	const std::string genomeFile = "genome.fna";
-	const std::string transcriptomeFile = "SRR19897826_trim.fastq";
+	const std::string transcriptomeFile = "SRR19897826.fastq";
 	const std::string fileExtension = transcriptomeFile.substr(transcriptomeFile.size() - 6); //this is ass
 	std::cout << "Genome file initializing" << std::endl;
 	Filter filter(filterSize, genomeFile, keysize);
@@ -21,7 +21,7 @@ int main()
 	FileHandler transcriptome(transcriptomeFile);
 	std::cout << "Transcriptome file processed" << std::endl;
 	std::vector<std::vector<DataGroup>> data;
-	filter.PrintSequence(45067130907, 18);
+	data.reserve(32);
 	//-------------------------------------------------------------------------------------------------
 	//looping section
 	//This should inherit the file format from the input
