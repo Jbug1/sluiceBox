@@ -11,8 +11,10 @@ int main()
 	const int keysize = 18;
 	const int flexfactor = 1;
 	const uint_fast64_t filterSize = 1000000000;
-	const std::string genomeFile = "genome.fna";
-	const std::string transcriptomeFile = "SRR19897826.fastq";
+	const std::string genomeFile = "genome_mouse.fna";
+	//const std::string transcriptomeFile = "SRR19897826_trim.fastq";
+	const std::string transcriptomeFile = "SRR20550421.fastq";
+
 	const std::string fileExtension = transcriptomeFile.substr(transcriptomeFile.size() - 6); //this is ass
 	std::cout << "Genome file initializing" << std::endl;
 	Filter filter(filterSize, genomeFile, keysize);
@@ -32,7 +34,8 @@ int main()
 	std::cout << "NEW OUTPUT BUFFER CHUNK: " << transcriptome.STRINGBUFFER_SIZE << std::endl;
 
 	int filechunkIter = 0;
-	while (!transcriptome.fileReader.eof())
+
+	while (!transcriptome.fileReader.eof() && filechunkIter * transcriptome.STRINGBUFFER_SIZE < transcriptomeFile.size())
 	{
 		transcriptome.ProcessNextChunk(); //Gets chunk
 		data.emplace_back();
@@ -81,4 +84,3 @@ int main()
 	return 0;
 }
 
-//5,153,189
