@@ -3,24 +3,31 @@
 
 //remove final newline in output file
 
-int main()
+int main(int argc, char* argv[])
 {
 	auto startProgramTimer = std::chrono::high_resolution_clock::now();
 
+	//check to see if there are enough args
+	for (int i = 0; i < argc; ++i)
+	{
+		std::cout << argv[i] << std::endl;
+	}
+	if (argc != 6) { std::cout << "NOT ENOUGH ARGS -> NEED 5, GIVEN " << argc - 1 << std::endl; abort(); }
+
 	//Program arguments
-	const int keysize = 18;
-	const int flexfactor = 1;
-	const uint_fast64_t filterSize = 1000000000;
-	const std::string genomeFile = "genome_mouse.fna";
+	const int keysize = std::stoi(argv[1]);
+	const int flexfactor = std::stoi(argv[2]);
+	const uint_fast64_t filterSize = std::stoll(argv[3]);
+	const std::string genomeFile = argv[4];
 	//const std::string transcriptomeFile = "SRR19897826_trim.fastq";
-	const std::string transcriptomeFile = "SRR20550421.fastq";
+	const std::string transcriptomeFile = argv[5];
 
 	const std::string fileExtension = transcriptomeFile.substr(transcriptomeFile.size() - 6); //this is ass
 	std::cout << "Genome file initializing" << std::endl;
 	Filter filter(filterSize, genomeFile, keysize);
 	std::cout << "Genome file processed" << std::endl;
 	std::cout << "Transcriptome file initializing" << std::endl;
-	FileHandler transcriptome(transcriptomeFile);
+	FileHandler transcriptome(FileType::TRANSCRIPTOME, transcriptomeFile);
 	std::cout << "Transcriptome file processed" << std::endl;
 	std::vector<std::vector<DataGroup>> data;
 	data.reserve(32);
@@ -35,7 +42,7 @@ int main()
 
 	int filechunkIter = 0;
 
-	while (!transcriptome.fileReader.eof() && filechunkIter * transcriptome.STRINGBUFFER_SIZE < transcriptomeFile.size())
+	while (!transcriptome.fileReader.eof())
 	{
 		transcriptome.ProcessNextChunk(); //Gets chunk
 		data.emplace_back();

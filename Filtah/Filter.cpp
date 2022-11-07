@@ -96,29 +96,33 @@ void Filter::PopulateFilter(std::string filename, int keysize)
 	std::ofstream finalout_file;
 	finalout_file.open("DEBUG_FILTERSEQUENCES.txt");
 
-	FileHandler genome(filename);
-	genome.ProcessNextChunk();
+	FileHandler genome(FileType::GENOME, filename);
 
 	uint_fast64_t convertedSequence = 0;
 	int numAdded = 0;
 	int shiftedIter = 0;
 	std::cout << "Filter iteration start" << std::endl;
-	for (int i = 0; i < genome.GetRealSize(); ++i)
+
+	while (!genome.fileReader.eof())
 	{
-		int result = ConvertSequenceToIntOPT(&genome.content, i, &convertedSequence);
-		if (result == -1)
+		genome.ProcessNextChunk();
+		for (int i = 0; i < genome.GetRealSize(); ++i)
 		{
-			convertedSequence = 0;
-			shiftedIter = 0;
-		}
-		else if (result == 0)
-		{
-			++shiftedIter;
-			if (shiftedIter == keysize)
+			int result = ConvertSequenceToIntOPT(&genome.content, i, &convertedSequence);
+			if (result == -1)
 			{
-				--shiftedIter;
-				Add(convertedSequence);
-				++numAdded;
+				convertedSequence = 0;
+				shiftedIter = 0;
+			}
+			else if (result == 0)
+			{
+				++shiftedIter;
+				if (shiftedIter == keysize)
+				{
+					--shiftedIter;
+					Add(convertedSequence);
+					++numAdded;
+				}
 			}
 		}
 	}
