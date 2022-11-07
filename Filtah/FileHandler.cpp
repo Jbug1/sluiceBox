@@ -55,7 +55,6 @@ void FileHandler::HandleChunk_Transcriptome(uintmax_t trueSize)
 					if (content[backwardsIter] != '+')
 					{
 						--cursor_end;
-						++filesizeIter;
 						calcedBufferSize = cursor_end - cursor_start + 1;
 						std::cout << "Starting new range: " << cursor_start << " | " << cursor_end << std::endl;
 						cursor_start = cursor_end + 1;
@@ -67,7 +66,6 @@ void FileHandler::HandleChunk_Transcriptome(uintmax_t trueSize)
 			else
 			{
 				--cursor_end;
-				++filesizeIter;
 			}
 		}
 	}
@@ -96,10 +94,9 @@ void FileHandler::ProcessNextChunk()
 	if (fileReader.eof()) 
 	{ 
 		singleRead = true; 
-		trueSize = filesizeIter;
+		trueSize = filesize - cursor_start;
 	}
 	cursor_end = cursor_start + trueSize - 1;
-
 	std::cout << "ProcessNextChunk(): " << trueSize << std::endl;
 	std::cout << "TOTAL FILE: " << filesize << " | USING: " << trueSize << std::endl;
 	//check flags for overshoot
