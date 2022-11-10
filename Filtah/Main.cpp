@@ -1,26 +1,24 @@
 #include "Filter.h"
 #include "DataTypes.h"
+#include "TestHeader.h"
 
 //remove final newline in output file
 
 int main(int argc, char* argv[])
 {
 	auto startProgramTimer = std::chrono::high_resolution_clock::now();
-
-	//check to see if there are enough args
-	for (int i = 0; i < argc; ++i)
-	{
-		std::cout << argv[i] << std::endl;
-	}
 	if (argc != 6) { std::cout << "NOT ENOUGH ARGS -> NEED 5, GIVEN " << argc - 1 << std::endl; abort(); }
 
 	//Program arguments
-	const int keysize = std::stoi(argv[1]);
+	const int keysize = std::stoi(argv[1]); //if(argc > 1) //arg -> keysize:18 -> split(:) if keysize -> 18
 	const int flexfactor = std::stoi(argv[2]);
 	const uint_fast64_t filterSize = std::stoll(argv[3]);
 	const std::string genomeFile = argv[4];
 	//const std::string transcriptomeFile = "SRR19897826_trim.fastq";
 	const std::string transcriptomeFile = argv[5];
+
+	//get from args stob
+	bool negativeMode = (bool)0;
 
 	const std::string fileExtension = transcriptomeFile.substr(transcriptomeFile.size() - 6); //this is ass
 	std::cout << "Genome file initializing" << std::endl;
@@ -56,9 +54,11 @@ int main(int argc, char* argv[])
 
 		int holdover, endpoint, flex;
 		BufferWriter bufferTool;
+		bool found;
 		for (int i = 0; i < currData.size(); ++i)
 		{
 			flex = 0;
+			found = false;
 			for (int j = currData[i].sequence_s; j <= currData[i].sequence_e - keysize + 1; )
 			{
 				uint_fast64_t conversion = 0;
@@ -66,15 +66,26 @@ int main(int argc, char* argv[])
 				filter.ConvertSequenceToInt(&transcriptome.content, j, &endpoint, &conversion, &holdover);
 				if (filter.Check(conversion))
 				{
-					bufferTool.Write(finalout_buffer, &transcriptome.content, currData[i].metadata_s, currData[i].metadata_e);
-					bufferTool.Write(finalout_buffer, &transcriptome.content, currData[i].sequence_s, currData[i].sequence_e);
-					bufferTool.AddPlus(finalout_buffer);
-					bufferTool.Write(finalout_buffer, &transcriptome.content, currData[i].quality_s, currData[i].quality_e);
+					if (!negativeMode)
+					{
+						bufferTool.Write(finalout_buffer, &transcriptome.content, currData[i].metadata_s, currData[i].metadata_e);
+						bufferTool.Write(finalout_buffer, &transcriptome.content, currData[i].sequence_s, currData[i].sequence_e);
+						bufferTool.AddPlus(finalout_buffer);
+						bufferTool.Write(finalout_buffer, &transcriptome.content, currData[i].quality_s, currData[i].quality_e);
+					}
+					found = true;
 					break;
 				}
 				j += keysize;
 				++flex;
 				if (flex == flexfactor) { break; }
+			}
+			if (negativeMode && !found)
+			{
+				bufferTool.Write(finalout_buffer, &transcriptome.content, currData[i].metadata_s, currData[i].metadata_e);
+				bufferTool.Write(finalout_buffer, &transcriptome.content, currData[i].sequence_s, currData[i].sequence_e);
+				bufferTool.AddPlus(finalout_buffer);
+				bufferTool.Write(finalout_buffer, &transcriptome.content, currData[i].quality_s, currData[i].quality_e);
 			}
 		}
 		std::cout << "Dumping chunk " << filechunkIter << " to file" << std::endl;

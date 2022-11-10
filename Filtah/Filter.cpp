@@ -23,8 +23,6 @@ bool Filter::Add(uint_fast64_t num)
 {
 	(*bits)[HashMethodA(num) % size] = 1;
 	(*bits)[HashMethodB(num) % size] = 1;
-	(*bits)[HashMethodC(num) % size] = 1;
-	(*bits)[HashMethodD(num) % size] = 1;
 
 	return false;
 }
@@ -32,9 +30,7 @@ bool Filter::Add(uint_fast64_t num)
 bool Filter::Check(uint_fast64_t num)
 {
 	return	(*bits)[HashMethodA(num) % size] &&
-			(*bits)[HashMethodB(num) % size] &&
-			(*bits)[HashMethodC(num) % size] && 
-			(*bits)[HashMethodD(num) % size];
+			(*bits)[HashMethodB(num) % size];
 }
 
 int Filter::ConvertSequenceToInt(std::string* file, int s, int* e, uint_fast64_t* ref, int* adjustments)

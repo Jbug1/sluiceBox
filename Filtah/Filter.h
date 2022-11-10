@@ -14,8 +14,6 @@ public:
 	bool Add(uint_fast64_t num);
 	bool Check(uint_fast64_t num);
 
-	inline int GetSize() { return size; }
-
 	void PopulateFilter(std::string filename, int keysize);
 
 	int ConvertSequenceToInt(std::string* file, int s, int* e, uint_fast64_t* ref, int* adjustments);
@@ -64,8 +62,6 @@ private:
 
 	inline uint_fast64_t HashMethodA(uint_fast64_t num) { return num; }
 	inline uint_fast64_t HashMethodB(uint_fast64_t num) { return std::hash<uint_fast64_t>{}(num); }
-	inline uint_fast64_t HashMethodC(uint_fast64_t num) { return num; }
-	inline uint_fast64_t HashMethodD(uint_fast64_t num) { return num; }
 
 	const int size = 0;
 	const int keysize = 0;
