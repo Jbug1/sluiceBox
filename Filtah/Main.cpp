@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
 	FileHandler transcriptome(FileType::TRANSCRIPTOME, transcriptomeFile);
 	std::cout << "Transcriptome file processed" << std::endl;
 	std::vector<std::vector<DataGroup>> data;
-	data.reserve(32);
+	data.reserve(32); //find what this should be 2^x
 	//-------------------------------------------------------------------------------------------------
 	//looping section
 	//This should inherit the file format from the input
