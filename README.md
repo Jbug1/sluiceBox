@@ -1,9 +1,9 @@
 ##### Table of Contents  
 [Description](#Description)  
 [Instructions](#Instructions)  
-[Test](#Test)
+[Test](#Test)  
 
-...snip...
+.
 <a name="Description"/>
 ## Description
 
@@ -16,12 +16,13 @@ Filtah is an RNAseq data prefilter designed to reduce alignment time while prese
 
 Filtah accepts Fastq files as input for RNAseq data and fasta files as input for reference genome data.
 
-...snip...
+.
 <a name="Instructions"/>
 ## Instructions
 
-lskadjlfas;df
+In order to display help, run filtah.exe --help. The following message will show in the terminal, explaining how to pass different parameters
 
+.
 <a name="Test"/>
 ## Test
 
