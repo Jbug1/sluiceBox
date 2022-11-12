@@ -29,14 +29,20 @@ bool Filter::Add(uint_fast64_t num)
 
 bool Filter::Check(uint_fast64_t num)
 {
+	//use both hash methods to check if 64 bit representation of sequence is present in filter
 	return	(*bits)[HashMethodA(num) % size] &&
 			(*bits)[HashMethodB(num) % size];
 }
 
 int Filter::ConvertSequenceToInt(std::string* file, int s, int* e, uint_fast64_t* ref, int* adjustments)
-{
+{	
+	//if we are on an endline character, we want to ignore this and move forward
+	//if we encounter a valid base, we want to add it to the int representation
+	//if we encounter a non-endline, non-base character, we need to reset the int representation
 	*ref = 0;
 	*adjustments = 0;
+
+	//badstart will be true if we are on an endline character
 	bool badStart = (*file)[s] == 10 || (*file)[s] == 13;
 	while (s <= *e)
 	{
@@ -51,7 +57,7 @@ int Filter::ConvertSequenceToInt(std::string* file, int s, int* e, uint_fast64_t
 			if (badStart) { ++(*adjustments); }
 			*e += 1; break;
 		default:
-			//std::cout << int((*file)[s]) << std::endl;
+			
 			return s;
 		}
 		++s;
@@ -59,7 +65,10 @@ int Filter::ConvertSequenceToInt(std::string* file, int s, int* e, uint_fast64_t
 	return -1;
 }
 int Filter::ConvertSequenceToIntOPT(std::string* file, int s, uint_fast64_t* ref)
-{
+{	
+	//if we are on an endline character, we want to ignore this and move forward
+	//if we encounter a valid base, we want to add it to the int representation
+	//if we encounter a non-endline, non-base character, we need to reset the int representation
 	switch ((*file)[s])
 	{
 	case 'A':	*ref = (*ref) << 2; *ref = *ref & bitmask; *ref |= 0; return 0;
