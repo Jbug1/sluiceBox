@@ -22,6 +22,7 @@ Filtah accepts Fastq files as input for RNAseq data and fasta files as input for
 
 In order to display help, run filtah.exe --help. The following message will show in the terminal, explaining how to pass different parameters
 
+Arguments must be passed in sequentially. The order for space separated command line arguments is as follows
 .
 <a name="Test"/>
 ## Test
