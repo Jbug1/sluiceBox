@@ -16,6 +16,14 @@ Filtah is an RNAseq data prefilter designed to reduce alignment time while prese
 
 Filtah accepts Fastq files as input for RNAseq data and fasta files as input for reference genome data.
 
+The motivating concept behind Filtah is that it should be possible to get a representative subset of reads by a process that is much less computationally intensive than aligning all RNAseq reads to a reference genome. Of course checking RNAseq reads for an exact match in a reference genome will not prove fruitful. Even slight discrepancies (sequencing errors, isoforms, snps, etc.) will lead to a failure of exact matching. Computing more robust similarity/distance scores for all points on the genome quickly increases computational needs to the point where we may as well just align the full RNAseq dataset. Filtah aims to strike a balance between these two extremes.
+
+Filtah first breaks down a given reference genome into all k-mers of a given length (keySize parameter). Storing all these k-mers requires approximately O(nk) memory, where k is keySize. For large genomes, storing/accessing a hash set of this size could prove problematic for many machine specifications. Filtah thus makes use of a bloom filter data structure, in order to decrease memory needs. The bloom filter implementation also offers improved query speed over other hashed types. 
+
+Filtah begins with a large zero array. K-mer values are then passed through two hash functions in order to determine which bits in the array to set to 1 during filter population. During examination of RNAseq data, k-mers of the same length are processed through the same two hash functions and checked in the filter. If Filtah is being run in positive mode, only those reads whose k-mers show a 1 value at both hased positions in the filter will be retained. This implementation guarantees that if we check the filter with a k-mer that was identical to some k-mer used to populate the filter, that read will be retained. There is a potential for false positives in this case, but not false negatives. If filtah is being run in negative mode, there is no such guarantee.
+
+The flexFactor parameter determines the maximum number of non-overlapping k-mers are checked in the filter for each RNAseq read. K-mers are chosen to be non-overlapping in order to guarantee that a RNA-seq read with a given number of discrepancies from the reference genome will be retained. Discrepancies can include any discrepancy in the sequence itself or a splice gap. A flex factor of 2 guarantees that an RNA-seq read with 1 such discrepancy will be retained, for example, assuming that the read length is at least keySize*2). Set the flex factor such that keySize*flexFactor is longer than the longest read in the set to check all possible non-overlapping k-mers.
+
 .
 <a name="Instructions"/>
 ## Instructions
@@ -72,13 +80,13 @@ You should now have 5 .bam files in this same directory. One for each of the .fa
 
 ![Alt text](/relative/path/to/img.jpg?raw=true)
 
-Next, CD into test_data and run summarize_similarity.r. This script will generate a count of exon expressions levels using Rsubreads featureCounts functionality, and return [cosine similarity](https://en.wikipedia.org/wiki/Cosine_similarity) scores for selected expression levels from the fastq files present in this directory. Each score reflects the similarity of some result to the expression levels of ecoli_sample.fastq, which is unfiltered.
+Next, CD into test_data and run summarize_similarity.r. Remember you must have rsubread and lsa packages installed. This script will generate a count of exon expressions levels using Rsubreads featureCounts functionality, and return [cosine similarity](https://en.wikipedia.org/wiki/Cosine_similarity) scores for selected expression levels from the fastq files present in this directory. Each score reflects the similarity of some result to the expression levels of ecoli_sample.fastq, which is unfiltered. Cosine similarity is bounded between 1 and -1, with 1 being identical and -1 being opposite.
 
 You should see the following results:
 
 ![Alt text](/relative/path/to/img.jpg?raw=true)
 
-This result demonstrates that relative expression levels from filtered outputs are highly similar to expression levels in the original, unfiltered data. Additionally, the siilarity of filtered results to the original data is much higher than a random sample from the combined dataset of a similar size. This indicates that in the combined setting, filtering provides a significant speed benefit while maintaining much higher similarity than we would see from a random sample of the combined data. This demonstrates the potential usefulness of Filtah in a metagenomics context, for example. 
+This result demonstrates that relative expression levels from filtered outputs are highly similar to expression levels in the original, unfiltered data. Additionally, the similarity of filtered results to the original data is much higher than a random sample from the combined dataset of a similar size. This indicates that in the combined setting, filtering provides a significant speed benefit while maintaining much higher similarity than we would see from a random sample of the combined data. This demonstrates the potential usefulness of Filtah in a metagenomics context, for example. 
 
 
 
