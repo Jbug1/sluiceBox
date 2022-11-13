@@ -64,7 +64,7 @@ Next, CD into test_data and create a bowtie2 index from the ecoli genome with th
 
 mkdir index
 
-![Alt text](/images/create_index.jpg?raw=true)
+![Alt text](/images/create_index.JPG?raw=true)
 
 Then run bowtie2 on all 4 of these datasets one by one in order to obtain alignment.bam files. In order for the similarity Rscript to run without edits, you must keep the same names that these files already have for bowtie output (i.e. ecoli_sample_filtered.fastq -> ecoli_sample_filtered.bam) as shown below. Note the significant decrease in alignment time from both filtered files.
 
