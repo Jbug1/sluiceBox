@@ -56,7 +56,7 @@ First, we will run filtah on two test datasets. The first is an NCBI downloaded 
 
 CD into the Filtah directory and run the following command to process both of these datasets at once:
 
-![Alt text](/relative/path/to/img.jpg?raw=true)
+![Alt text](/images/run_filter.JPG?raw=true)
 
 This will result in the creation of two new fastq files (ecoli_sample_filtered.fastq and sample_combined_filtered.fastq)
 
@@ -64,27 +64,29 @@ Next, CD into test_data and create a bowtie2 index from the ecoli genome with th
 
 mkdir index
 
-![Alt text](/relative/path/to/img.jpg?raw=true)
+![Alt text](/images/create_index.jpg?raw=true)
 
 Then run bowtie2 on all 4 of these datasets one by one in order to obtain alignment.bam files. In order for the similarity Rscript to run without edits, you must keep the same names that these files already have for bowtie output (i.e. ecoli_sample_filtered.fastq -> ecoli_sample_filtered.bam) as shown below. Note the significant decrease in alignment time from both filtered files.
 
-![Alt text](/relative/path/to/img.jpg?raw=true)
+![Alt text](/images/run_bowtie.JPG?raw=true)
 
-![Alt text](/relative/path/to/img.jpg?raw=true)
+![Alt text](/images/bowtie_2.JPG?raw=true)
 
-![Alt text](/relative/path/to/img.jpg?raw=true)
+![Alt text](/images/bowtie_3.JPG?raw=true)
 
 Run bowtie2 on random_subset.fastq. random_subset.fastq is a random sample of reads from sample_combined.fastq of a similar length to the result we obtain in sample_combined_filtered.fastq. The file sizes differ, but you can check that the line numbers are very similar.
 
 You should now have 5 .bam files in this same directory. One for each of the .fastq files that were either initially supplied or created using Filtah
 
-![Alt text](/relative/path/to/img.jpg?raw=true)
+![Alt text](/images/bowtie_4.JPG?raw=true)
 
-Next, CD into test_data and run summarize_similarity.r. Remember you must have rsubread and lsa packages installed. This script will generate a count of exon expressions levels using Rsubreads featureCounts functionality, and return [cosine similarity](https://en.wikipedia.org/wiki/Cosine_similarity) scores for selected expression levels from the fastq files present in this directory. Each score reflects the similarity of some result to the expression levels of ecoli_sample.fastq, which is unfiltered. Cosine similarity is bounded between 1 and -1, with 1 being identical and -1 being opposite.
+Next, CD into test_data and run summarize_similarity.r using the rscript command. Remember you must have rsubread and lsa packages installed. This script will generate a count of exon expressions levels using Rsubreads featureCounts functionality, and return [cosine similarity](https://en.wikipedia.org/wiki/Cosine_similarity) scores for selected expression levels from the fastq files present in this directory. Each score reflects the similarity of some result to the expression levels of ecoli_sample.fastq, which is unfiltered. Cosine similarity is bounded between 1 and -1, with 1 being identical and -1 being opposite.
+
+![Alt text](/images/similarity.JPG?raw=true)
 
 You should see the following results:
 
-![Alt text](/relative/path/to/img.jpg?raw=true)
+![Alt text](/images/results.JPG?raw=true)
 
 This result demonstrates that relative expression levels from filtered outputs are highly similar to expression levels in the original, unfiltered data. Additionally, the similarity of filtered results to the original data is much higher than a random sample from the combined dataset of a similar size. This indicates that in the combined setting, filtering provides a significant speed benefit while maintaining much higher similarity than we would see from a random sample of the combined data. This demonstrates the potential usefulness of Filtah in a metagenomics context, for example. 
 
