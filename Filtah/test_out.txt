@@ -1,5 +1,0 @@
-Time to write 1M lines, and store into string in ms: 4030
-Time to write 1M lines in ms: 3984
-Time to store into string in ms: 46
-Time to iterate over 1000000 lines: 80
-Time to run getline on 1000000 lines: 2257
