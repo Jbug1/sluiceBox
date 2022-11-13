@@ -7,14 +7,15 @@
 <a name="Description"/>
 ## Description
 
-Filtah is an RNAseq data prefilter designed to reduce alignment time while preserving relative expression data with high fidelity. It relies on a basic 
-[Bloom Filter]( https://en.wikipedia.org/wiki/Bloom_filter) implementation to filter out RNAseq reads whose k-mers of some user-specified length are not found in the Bloom Filter array generated from a reference genome (positive mode). Basic steps are outlined below:
+sluiceBox is an RNAseq data prefilter created by Jonah Poczobutt and Armin Anderson designed to reduce alignment time while preserving relative expression data with high fidelity. It relies on a [Bloom Filter]( https://en.wikipedia.org/wiki/Bloom_filter) implementation to filter out RNAseq reads whose k-mers of some user-specified length are not found in the Bloom Filter array generated from a reference genome (positive mode). Basic steps are outlined below:
 
 1) Populate an array with hashed values of all k-mers from the reference genome.
 2) Generate non-overlapping k-mers from RNAseq reads to check the filter for. 
 3) Write reads to output file based on acceptance criteria (positive mode - write reads that are found in the filter , negative mode-write reads that are not found in the filter)
 
-Filtah accepts Fastq files as input for RNAseq data and fasta files as input for reference genome data.
+sluiceBox accepts Fastq files as input for RNAseq data and fasta files as input for reference genome data.
+
+sluiceBox is named for the placer mining sluice box tool popular during the California gold rush. [Sluice boxes](https://en.wikipedia.org/wiki/Placer_mining#Sluice_box)  were used to filter out gold from ore deposited into the box.
 
 The motivating concept behind Filtah is that it should be possible to get a representative subset of reads by a process that is much less computationally intensive than aligning all RNAseq reads to a reference genome. Of course checking RNAseq reads for an exact match in a reference genome will not prove fruitful. Even slight discrepancies (sequencing errors, isoforms, snps, etc.) will lead to a failure of exact matching. Computing more robust similarity/distance scores for all points on the genome quickly increases computational needs to the point where we may as well just align the full RNAseq dataset. Filtah aims to strike a balance between these two extremes.
 
