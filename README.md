@@ -41,7 +41,7 @@ Arguments must be passed in sequentially. The order for space separated command 
    Filepath to the reference genome (fasta format)
 5) RNAseqFile - str or strings
    Filepath to RNAseq reads file (fastq format)
-   You may pass as many RNAseq files as you need to. All will be processed using the same filter.
+   You may pass amultiple RNASeq files. All will be processed using the same filter.
    
 Filtah will notify through command line output once the filter has been created, and again for every RNAseq file chunk that is processed and written to the output file.
 .
