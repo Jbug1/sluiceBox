@@ -66,7 +66,7 @@ mkdir index
 
 ![Alt text](/images/create_index.JPG?raw=true)
 
-Then run bowtie2 on all 4 of these datasets one by one in order to obtain alignment.bam files. In order for the similarity Rscript to run without edits, you must keep the same names that these files already have for bowtie output (i.e. ecoli_sample_filtered.fastq -> ecoli_sample_filtered.bam) as shown below. Note the significant decrease in alignment time from both filtered files.
+Then run bowtie2 on all 4 of these datasets one by one in order to obtain alignment.bam files. Remember to use include the -t parameter to see how long it takes to align each file. Filtered files should run in substantially less time. In order for the similarity Rscript to run without edits, you must keep the same names that these files already have for bowtie output (i.e. ecoli_sample_filtered.fastq -> ecoli_sample_filtered.bam) as shown below. Note the significant decrease in alignment time from both filtered files.
 
 ![Alt text](/images/run_bowtie.JPG?raw=true)
 
