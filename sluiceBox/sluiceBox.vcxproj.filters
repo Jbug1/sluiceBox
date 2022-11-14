@@ -60,11 +60,5 @@
     <None Include="formattedOutput.fastq">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="SRR19897826.fastq">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="SRR19897826_trim.fastq">
-      <Filter>Resource Files</Filter>
-    </None>
   </ItemGroup>
 </Project>

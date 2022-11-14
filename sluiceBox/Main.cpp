@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
 		const std::string fileExtension = transcriptomeFile.substr(transcriptomeFile.size() - 6); //split at . or something
 		std::cout << "Transcriptome file initializing: " << transcriptomeFile << std::endl;
 		FileHandler transcriptome(FileType::TRANSCRIPTOME, transcriptomeFile);
-		std::cout << "Transcriptome file processed" << std::endl;
+		//std::cout << "Transcriptome file processed" << std::endl;
 		std::vector<std::vector<DataGroup>> data;
 		data.reserve(32); 
 

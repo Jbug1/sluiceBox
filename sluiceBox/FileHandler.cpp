@@ -14,7 +14,7 @@ FileHandler::FileHandler(FileType type, std::string transcriptome)
 		std::filesystem::path p{ transcriptome };
 		filesize = std::filesystem::file_size(p);
 		filesizeIter = filesize;
-		std::cout << "INIT WITH FILE SIZE: " << filesize << std::endl;
+		//std::cout << "INIT WITH FILE SIZE: " << filesize << std::endl;
 		singleRead = filesize < STRINGBUFFER_SIZE ? true : false;
 	}
 }
@@ -56,7 +56,7 @@ void FileHandler::HandleChunk_Transcriptome(uintmax_t trueSize)
 					{
 						--cursor_end;
 						calcedBufferSize = cursor_end - cursor_start + 1;
-						std::cout << "Starting new range: " << cursor_start << " | " << cursor_end << std::endl;
+						//std::cout << "Starting new range: " << cursor_start << " | " << cursor_end << std::endl;
 						cursor_start = cursor_end + 1;
 						filesizeIter -= trueSize;
 						scanning = false;
@@ -73,7 +73,7 @@ void FileHandler::HandleChunk_Transcriptome(uintmax_t trueSize)
 	{
 		cursor_end++;
 		calcedBufferSize = cursor_end - cursor_start;
-		std::cout << "Starting new range on FINAL: " << cursor_start << " | " << cursor_end << std::endl;
+		//std::cout << "Starting new range on FINAL: " << cursor_start << " | " << cursor_end << std::endl;
 	}
 
 	for (int i = 0; i < GetRealSize(); ++i)
@@ -97,8 +97,8 @@ void FileHandler::ProcessNextChunk()
 		trueSize = filesize - cursor_start;
 	}
 	cursor_end = cursor_start + trueSize - 1;
-	std::cout << "ProcessNextChunk(): " << trueSize << std::endl;
-	std::cout << "TOTAL FILE: " << filesize << " | USING: " << trueSize << std::endl;
+	//std::cout << "ProcessNextChunk(): " << trueSize << std::endl;
+	//std::cout << "TOTAL FILE: " << filesize << " | USING: " << trueSize << std::endl;
 	//check flags for overshoot
 
 	switch (type)
