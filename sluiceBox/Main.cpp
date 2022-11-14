@@ -44,6 +44,7 @@ int main(int argc, char* argv[])
 
 	for(const std::string& transcriptomeFile : transcriptomes)
 	{
+		auto singlerunTimer = std::chrono::high_resolution_clock::now();
 		const std::string fileExtension = transcriptomeFile.substr(transcriptomeFile.size() - 6); //split at . or something
 		std::cout << "Transcriptome file initializing: " << transcriptomeFile << std::endl;
 		FileHandler transcriptome(FileType::TRANSCRIPTOME, transcriptomeFile);
@@ -132,12 +133,15 @@ int main(int argc, char* argv[])
 		}
 
 		finalout_file.close();
+		auto singlerunTimerEnd = std::chrono::high_resolution_clock::now();
+		float time = std::chrono::duration_cast<std::chrono::milliseconds>(singlerunTimerEnd - singlerunTimer).count() / 1000.0f;
+		std::cout << transcriptomeFile << " took " << time << " seconds" << std::endl;
 	}
 
 	auto endProgramTimer = std::chrono::high_resolution_clock::now();
 
 	float time = std::chrono::duration_cast<std::chrono::milliseconds>(endProgramTimer - startProgramTimer).count() / 1000.0f;
-	std::cout << time << std::endl;
+	std::cout << "OVERALL: " << time << std::endl;
 
 	return 0;
 }
