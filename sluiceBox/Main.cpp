@@ -38,9 +38,9 @@ int main(int argc, char* argv[])
 		negativeMode = true;
 	}
 
-	std::cout << "Genome file initializing" << std::endl;
+	//std::cout << "Genome file initializing" << std::endl;
 	Filter filter(filterSize, genomeFile, keysize);
-	std::cout << "Genome file processed" << std::endl;
+	//std::cout << "Genome file processed" << std::endl;
 
 	for(const std::string& transcriptomeFile : transcriptomes)
 	{

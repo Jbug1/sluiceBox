@@ -6,7 +6,7 @@ Filter::Filter(int size, std::string genome, int keysize) :
 {
 	bits = new std::vector<bool>();
 	bits->resize(size);
-	std::cout << "Filter created, with size " << bits->size() << std::endl;
+	//std::cout << "Filter created, with size " << bits->size() << std::endl;
 	PopulateFilter(genome, keysize);
 }
 
@@ -106,7 +106,7 @@ void Filter::PopulateFilter(std::string filename, int keysize)
 	uint_fast64_t convertedSequence = 0;
 	int numAdded = 0;
 	int shiftedIter = 0;
-	std::cout << "Filter iteration start" << std::endl;
+	//std::cout << "Filter iteration start" << std::endl;
 
 	while (!genome.fileReader.eof())
 	{
