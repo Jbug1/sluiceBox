@@ -19,7 +19,7 @@ sluiceBox is named for the placer mining sluice box tool popular during the Cali
 
 The motivating concept behind sluiceBox is that it should be possible to get a representative subset of reads by a process that is much less computationally intensive than aligning all RNAseq reads to a reference genome. Of course checking RNAseq reads for an exact match in a reference genome will not prove fruitful. Even slight discrepancies (sequencing errors, splice gaps, snps, etc.) will lead to a failure of exact matching. Computing more robust similarity/distance scores for all points on the genome quickly increases computational needs to the point where we may as well just align the full RNAseq dataset. sluiceBox aims to strike a balance between these two extremes.
 
-sluiceBox first breaks down a given reference genome into all k-mers of a given length (keySize parameter). Storing all these k-mers requires approximately O(nk) memory, where k is keySize. For large genomes, storing/accessing a hash set of this size could prove problematic for many machine specifications. Filtah thus makes use of a bloom filter data structure, in order to decrease memory needs. The bloom filter implementation also offers improved query speed over other hashed types. 
+sluiceBox first breaks down a given reference genome into all k-mers of a given length (keySize parameter). Storing all these k-mers requires approximately O(nk) memory, where k is keySize. For large genomes, storing/accessing a hash set of this size could prove problematic for many machine specifications. sluiceBox thus makes use of a bloom filter data structure, in order to decrease memory needs. The bloom filter implementation also offers improved query speed over other hashed types. 
 
 sluiceBox begins with a large zero array. K-mer values are then passed through two hash functions in order to determine which bits in the array to set to 1 during filter population. During examination of RNAseq data, k-mers of the same length are processed through the same two hash functions and checked in the filter. If sluiceBox is being run in positive mode, only those reads whose k-mers show a 1 value at both hased positions in the filter will be retained. This implementation guarantees that if we check the filter with a k-mer that was identical to some k-mer used to populate the filter, that read will be retained. There is a potential for false positives in this case, but not false negatives. If sluiceBox is being run in negative mode, there is no such guarantee.
 
@@ -31,7 +31,7 @@ The flexFactor parameter determines the maximum number of non-overlapping k-mers
 
 To build sluiceBox, cd into the sluiceBox folder. Run build.sh if on OSX, build.bat if on Windows. You should now have a sluiceBox executable.
 
-In order to display help, run filtah.exe --help. The following message will show in the terminal, explaining how to pass different parameters
+In order to display help, run sluiceBox.exe --help. The following message will show in the terminal, explaining how to pass different parameters
 
 Arguments must be passed in sequentially. The order for space separated command line arguments is as follows
 1) mode - "p" for positive "n" for negative
