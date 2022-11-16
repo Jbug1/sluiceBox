@@ -1,6 +1,5 @@
 #include "Filter.h"
 #include "DataTypes.h"
-#include "TestHeader.h"
 #include <iostream>  
 #include <cstring>  
 
