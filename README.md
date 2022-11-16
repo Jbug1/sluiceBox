@@ -59,33 +59,38 @@ First, we will run sluiceBox on two test datasets. The first is an NCBI download
 
 CD into the sluiceBox directory and run the following command to process both of these datasets at once:
 
-![Alt text](/images/run_filter.JPG?raw=true)
+`sluiceBox p 18 1 ..test_data/genome.fna ../test_data/ecoli_sample.fastq ../test_data/sample_combined.fastq`
 
 This will result in the creation of two new fastq files (ecoli_sample_filtered.fastq and sample_combined_filtered.fastq)
 
 Next, CD into test_data and create a bowtie2 index in a separate folder from the ecoli reference genome with the commands shown below:
 
+```bash
+cd../test_data
 mkdir index
+cd index
+bowite2-build ../genome.fna ecoli
+cd ..
+```
 
-![Alt text](/images/create_index.JPG?raw=true)
 
-Then run bowtie2 on all 4 of these datasets one by one in order to obtain alignment.bam files. Remember to use include the -t parameter to see how long it takes to align each file. Filtered files should run in substantially less time. In order for the similarity Rscript to run without edits, you must keep the same names that these files already have for bowtie output (i.e. ecoli_sample_filtered.fastq -> ecoli_sample_filtered.bam) as shown below. Note the significant decrease in alignment time from both filtered files.
+Then run bowtie2 on all 5 fastq files one by one in order to obtain alignment.bam files. Remember to use include the -t parameter to see how long it takes to align each file. Filtered files should run in substantially less time. In order for the similarity Rscript to run without edits, you must keep the same names that these files already have for bowtie output (i.e. ecoli_sample_filtered.fastq -> ecoli_sample_filtered.bam) as shown below. Note the significant decrease in alignment time from both filtered files.
 
-![Alt text](/images/run_bowtie.JPG?raw=true)
+```bash
+bowtie2 -q ecoli_sample.fastq -x index/ecoli -S ecoli_sample.sam -t 
+bowtie2 -q ecoli_sample_filtered.fastq -x index/ecoli -S ecoli_sample_filtered.sam -t 
+bowtie2 -q sample_combined.fastq -x index/ecoli -S sample_combined.sam -t 
+bowtie2 -q sample_combined_filtered.fastq -x index/ecoli -S sample_combined_fitlered.sam -t 
+bowtie2 -q random_subset.fastq -x index/ecoli -S random_subset.sam -t 
+```
 
-![Alt text](/images/bowtie_2.JPG?raw=true)
+Random_subset.fastq is a random sample of reads from sample_combined.fastq of a similar length to the result we obtain in sample_combined_filtered.fastq. The file sizes differ, but you can check that the line numbers are very similar.
 
-![Alt text](/images/bowtie_3.JPG?raw=true)
+You should now have 5 .sam files in this same directory. One for each of the .fastq files that were either initially supplied or created using sluiceBox
 
-Run bowtie2 on random_subset.fastq. random_subset.fastq is a random sample of reads from sample_combined.fastq of a similar length to the result we obtain in sample_combined_filtered.fastq. The file sizes differ, but you can check that the line numbers are very similar.
+Next, run summarize_similarity.r using the rscript command. Remember you must have rsubread and lsa packages installed. This script will generate a count of exon expressions levels using Rsubreads featureCounts functionality, and return [cosine similarity](https://en.wikipedia.org/wiki/Cosine_similarity) scores for selected expression levels from the fastq files present in this directory. Each score reflects the similarity of some result to the expression levels of ecoli_sample.fastq, which is unfiltered. Cosine similarity is bounded between 1 and -1, with 1 being identical and -1 being opposite.
 
-You should now have 5 .bam files in this same directory. One for each of the .fastq files that were either initially supplied or created using sluiceBox
-
-![Alt text](/images/bowtie_4.JPG?raw=true)
-
-Next, CD into test_data and run summarize_similarity.r using the rscript command. Remember you must have rsubread and lsa packages installed. This script will generate a count of exon expressions levels using Rsubreads featureCounts functionality, and return [cosine similarity](https://en.wikipedia.org/wiki/Cosine_similarity) scores for selected expression levels from the fastq files present in this directory. Each score reflects the similarity of some result to the expression levels of ecoli_sample.fastq, which is unfiltered. Cosine similarity is bounded between 1 and -1, with 1 being identical and -1 being opposite.
-
-![Alt text](/images/similarity.JPG?raw=true)
+`Rscript summarize_similarity.r`
 
 You should see the following results:
 
