@@ -164,7 +164,6 @@
     <Text Include="old.txt" />
     <Text Include="testinput.txt" />
   </ItemGroup>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
