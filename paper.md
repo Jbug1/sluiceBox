@@ -1,115 +1,46 @@
 ---
 title: 'Gala: A Python package for galactic dynamics'
 tags:
-  - Python
-  - astronomy
-  - dynamics
-  - galactic dynamics
-  - milky way
+  - C++
+  - Transcriptomics
+  - Genomics
+  - High Throughput Sequencing
+  - Metagenomics
+  - Metatranscriptomics
 authors:
-  - name: Adrian M. Price-Whelan
+  - name: Jonah Poczobutt
     orcid: 0000-0000-0000-0000
     equal-contrib: true
-    affiliation: "1, 2" # (Multiple affiliations must be quoted)
-  - name: Author Without ORCID
+    affiliation:
+  - name: Armin Anderson
     equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
-    affiliation: 2
-  - name: Author with no affiliation
-    corresponding: true # (This is how to denote the corresponding author)
-    affiliation: 3
-affiliations:
- - name: Lyman Spitzer, Jr. Fellow, Princeton University, USA
-   index: 1
- - name: Institution Name, Country
-   index: 2
- - name: Independent Researcher, Country
-   index: 3
-date: 13 August 2017
+    affiliation:
+
+date: 21 November 2022
 
 
-# Optional fields if submitting to a AAS journal too, see this blog post:
-# https://blog.joss.theoj.org/2018/12/a-new-collaboration-with-aas-publishing
-aas-doi: 10.3847/xxxxx <- update this with the DOI from AAS once you know it.
-aas-journal: Astrophysical Journal <- The name of the AAS journal.
 ---
 
 # Summary
+sluiceBox is an RNAseq data prefilter created by Jonah Poczobutt (jonahpocz@gmail.com) and Armin Anderson designed to reduce alignment time while preserving relative expression data with high fidelity. It relies on a Bloom Filter implementation to filter out RNAseq reads whose k-mers of some user-specified length are not found in the Bloom Filter array generated from a reference genome (positive mode). Basic steps are outlined below:
 
-The forces on stars, galaxies, and dark matter under external gravitational
-fields lead to the dynamical evolution of structures in the universe. The orbits
-of these bodies are therefore key to understanding the formation, history, and
-future state of galaxies. The field of "galactic dynamics," which aims to model
-the gravitating components of galaxies to study their structure and evolution,
-is now well-established, commonly taught, and frequently used in astronomy.
-Aside from toy problems and demonstrations, the majority of problems require
-efficient numerical tools, many of which require the same base code (e.g., for
-performing numerical orbit integration).
+Populate an array with hashed values of all k-mers from the reference genome.
+Generate non-overlapping k-mers from RNAseq reads to check the filter for.
+Write reads to output file based on acceptance criteria (positive mode - write reads that are found in the filter , negative mode-write reads that are not found in the filter)
+sluiceBox accepts Fastq files as input for RNAseq data and fasta files as input for reference genome data. It can be compiled on Windows and OSX.
+
+sluiceBox is named for the placer mining sluice box tool popular during the California gold rush. Sluice boxes were used to filter out gold from ore deposited into the box.
+
 
 # Statement of need
 
-`Gala` is an Astropy-affiliated Python package for galactic dynamics. Python
-enables wrapping low-level languages (e.g., C) for speed without losing
-flexibility or ease-of-use in the user-interface. The API for `Gala` was
-designed to provide a class-based and user-friendly interface to fast (C or
-Cython-optimized) implementations of common operations such as gravitational
-potential and force evaluation, orbit integration, dynamical transformations,
-and chaos indicators for nonlinear dynamics. `Gala` also relies heavily on and
-interfaces well with the implementations of physical units and astronomical
-coordinate systems in the `Astropy` package [@astropy] (`astropy.units` and
-`astropy.coordinates`).
+The motivating concept behind sluiceBox is that it should be possible to get a representative subset of reads by a process that is much less computationally intensive than aligning all RNAseq reads to a reference genome. Of course checking RNAseq reads for an exact match in a reference genome will not prove fruitful. Even slight discrepancies (sequencing errors, splice gaps, snps, etc.) will lead to a failure of exact matching. Computing more robust similarity/distance scores for all points on the genome quickly increases computational needs to the point where we may as well just align the full RNAseq dataset. sluiceBox aims to strike a balance between these two extremes.
 
-`Gala` was designed to be used by both astronomical researchers and by
-students in courses on gravitational dynamics or astronomy. It has already been
-used in a number of scientific publications [@Pearson:2017] and has also been
-used in graduate courses on Galactic dynamics to, e.g., provide interactive
-visualizations of textbook material [@Binney:2008]. The combination of speed,
-design, and support for Astropy functionality in `Gala` will enable exciting
-scientific explorations of forthcoming data releases from the *Gaia* mission
-[@gaia] by students and experts alike.
+SluiceBox is easy to download and compile from github, presenting users with a low friction option for beginning RNA seq filtering. This ease of use is a key advantage of the software.
 
-# Mathematics
+sluiceBox first breaks down a given reference genome into all k-mers of a given length (keySize parameter). Storing all these k-mers requires approximately O(nk) memory, where k is keySize. For large genomes, storing/accessing a hash set of this size could prove problematic for many machine specifications. sluiceBox thus makes use of a bloom filter data structure, in order to decrease memory needs. The bloom filter implementation also offers improved query speed over other hashed types.
 
-Single dollars ($) are required for inline mathematics e.g. $f(x) = e^{\pi/x}$
+sluiceBox begins with a large zero array. K-mer values are then passed through two hash functions in order to determine which bits in the array to set to 1 during filter population. During examination of RNAseq data, k-mers of the same length are processed through the same two hash functions and checked in the filter. If sluiceBox is being run in positive mode, only those reads whose k-mers show a 1 value at both hased positions in the filter will be retained. This implementation guarantees that if we check the filter with a k-mer that was identical to some k-mer used to populate the filter, that read will be retained. There is a potential for false positives in this case, but not false negatives. If sluiceBox is being run in negative mode, there is no such guarantee.
 
-Double dollars make self-standing equations:
+The flexFactor parameter determines the maximum number of non-overlapping k-mers are checked in the filter for each RNAseq read. K-mers are chosen to be non-overlapping in order to guarantee that a RNA-seq read with a given number of discrepancies from the reference genome will be retained. Discrepancies can include any discrepancy in the sequence itself or a splice gap. A flex factor of 2 guarantees that an RNA-seq read with 1 such discrepancy will be retained, for example, assuming that the read length is at least keySize*2. Set the flex factor such that key size * flex factor is longer than the longest read in the set to check all possible non-overlapping k-mers.
 
-$$\Theta(x) = \left\{\begin{array}{l}
-0\textrm{ if } x < 0\cr
-1\textrm{ else}
-\end{array}\right.$$
-
-You can also use plain \LaTeX for equations
-\begin{equation}\label{eq:fourier}
-\hat f(\omega) = \int_{-\infty}^{\infty} f(x) e^{i\omega x} dx
-\end{equation}
-and refer to \autoref{eq:fourier} from text.
-
-# Citations
-
-Citations to entries in paper.bib should be in
-[rMarkdown](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html)
-format.
-
-If you want to cite a software repository URL (e.g. something on GitHub without a preferred
-citation) then you can do it with the example BibTeX entry below for @fidgit.
-
-For a quick reference, the following citation commands can be used:
-- `@author:2001`  ->  "Author et al. (2001)"
-- `[@author:2001]` -> "(Author et al., 2001)"
-- `[@author1:2001; @author2:2001]` -> "(Author1 et al., 2001; Author2 et al., 2002)"
-
-# Figures
-
-Figures can be included like this:
-![Caption for example figure.\label{fig:example}](figure.png)
-and referenced from text using \autoref{fig:example}.
-
-Figure sizes can be customized by adding an optional second parameter:
-![Caption for example figure.](figure.png){ width=20% }
-
-# Acknowledgements
-
-We acknowledge contributions from Brigitta Sipocz, Syrtis Major, and Semyeong
-Oh, and support from Kathryn Johnston during the genesis of this project.
-
-# References
