@@ -9,11 +9,11 @@ tags:
   - Metatranscriptomics
 authors:
   - name: Jonah Poczobutt
-    orcid: 0000-0000-0000-0000
+    orcid: 0000-0003-3358-0817
     equal-contrib: true
     affiliation:
   - name: Armin Anderson
-    equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
+    equal-contrib: true 
     affiliation:
 
 date: 21 November 2022
