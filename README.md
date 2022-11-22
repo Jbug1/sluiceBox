@@ -1,6 +1,6 @@
 Contributing:
 
-Contributing to sluiceBox is highly welcome! We would be happy to work with anyone hoping to extend or alter the software and are open to any ideas you might have. User feedback is important and will help inform future design decisions.
+Contributing to sluiceBox is highly welcome! We would be happy to work with anyone hoping to extend or alter the software and are open to any ideas you might have. User feedback is important and will help inform future design decisions. Please see contributing.md for more details.
 
 ##### Table of Contents  
 [Description](#Description)  
