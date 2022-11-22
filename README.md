@@ -7,7 +7,7 @@
 <a name="Description"/>
 ## Description
 
-sluiceBox is an RNAseq data prefilter created by Jonah Poczobutt and Armin Anderson designed to reduce alignment time while preserving relative expression data with high fidelity. It relies on a [Bloom Filter]( https://en.wikipedia.org/wiki/Bloom_filter) implementation to filter out RNAseq reads whose k-mers of some user-specified length are not found in the Bloom Filter array generated from a reference genome (positive mode). Basic steps are outlined below:
+sluiceBox is an RNAseq data prefilter created by Jonah Poczobutt (jonahpocz@gmail.com) and Armin Anderson designed to reduce alignment time while preserving relative expression data with high fidelity. It relies on a [Bloom Filter]( https://en.wikipedia.org/wiki/Bloom_filter) implementation to filter out RNAseq reads whose k-mers of some user-specified length are not found in the Bloom Filter array generated from a reference genome (positive mode). Basic steps are outlined below:
 
 1) Populate an array with hashed values of all k-mers from the reference genome.
 2) Generate non-overlapping k-mers from RNAseq reads to check the filter for. 
