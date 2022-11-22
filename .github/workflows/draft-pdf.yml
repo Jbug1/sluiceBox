@@ -1,3 +1,6 @@
+- name: Open Journals PDF Generator
+  uses: openjournals/openjournals-draft-action@v.1.0
+
 on: [push]
 
 jobs:
@@ -21,3 +24,4 @@ jobs:
           # PDF. Note, this should be the same directory as the input
           # paper.md
           path: paper.pdf
+          
